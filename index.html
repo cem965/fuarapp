@@ -1339,11 +1339,10 @@ function updateDashboard() {
 
   const ds = document.getElementById('dashSiparisler');
 
-  // Yakındaki 5 fuarı bul
+  // Tüm gelecek fuarları bul (limit yok)
   const yakinFuarlar = FUARLAR
     .filter(f => f.endDate >= TODAY)
-    .sort((a,b) => a.startDate - b.startDate)
-    .slice(0, 5);
+    .sort((a,b) => a.startDate - b.startDate);
 
   // Bu fuarlarda onaylı projesi olanları filtrele
   const fuarlarWithProje = yakinFuarlar.filter(f =>
