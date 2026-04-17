@@ -1,0 +1,2462 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FuarApp</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a12;
+  --surface: #111120;
+  --surface2: #181828;
+  --border: rgba(255,255,255,0.08);
+  --text: #f0f0ff;
+  --muted: #7a7a9a;
+  --accent: #6c63ff;
+  --accent2: #ff6b6b;
+  --green: #26de81;
+  --yellow: #f7b731;
+  --orange: #fd9644;
+  --red: #fc5c65;
+  --blue: #45aaf2;
+
+  --tab-h: 64px;
+  --header-h: 60px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--header-h);
+  background: rgba(10,10,18,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.app-logo {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+
+.app-logo span { color: var(--accent); }
+
+.header-actions { display: flex; gap: 8px; }
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  transition: all .2s;
+}
+.icon-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+/* ── PAGES ── */
+.page { display: none; padding: 16px 16px calc(var(--tab-h) + 20px); min-height: calc(100vh - var(--header-h)); }
+.page.active { display: block; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+/* ── BOTTOM TABS ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  height: var(--tab-h);
+  background: rgba(10,10,18,0.97);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 50;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px;
+  background: none; border: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .2s;
+  font-family: 'Roboto', sans-serif;
+  padding-bottom: 4px;
+}
+
+.tab-btn.active { color: var(--accent); }
+.tab-btn .tab-icon { font-size: 18px; }
+.tab-btn .tab-label { font-size: 9px; letter-spacing: 0.3px; text-transform: uppercase; font-weight: 600; }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.section-sub {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color .2s;
+}
+.card:hover { border-color: rgba(255,255,255,0.15); }
+
+/* ── STAT GRID ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.stat-val {
+  font-family: 'Roboto', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -1px;
+}
+
+.stat-lbl {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ── BADGE ── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.badge-green { background: rgba(38,222,129,0.15); color: var(--green); }
+.badge-yellow { background: rgba(247,183,49,0.15); color: var(--yellow); }
+.badge-red { background: rgba(252,92,101,0.15); color: var(--red); }
+.badge-blue { background: rgba(69,170,242,0.15); color: var(--blue); }
+.badge-purple { background: rgba(108,99,255,0.15); color: var(--accent); }
+
+/* ── FORM ── */
+.form-group { margin-bottom: 14px; }
+
+.form-label {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 7px;
+  display: block;
+  font-weight: 500;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
+  padding: 13px 14px;
+  outline: none;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+}
+
+.form-textarea { min-height: 80px; resize: vertical; }
+
+.form-select option { background: #1a1a2e; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+  letter-spacing: 0.3px;
+}
+
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #7c74ff; }
+.btn-danger { background: rgba(252,92,101,0.15); color: var(--red); border: 1px solid rgba(252,92,101,0.3); }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-full { width: 100%; }
+.btn-sm { padding: 7px 12px; font-size: 11px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+
+.modal-sheet {
+  background: #13131f;
+  border: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  padding: 20px;
+  width: 100%; max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp .25s ease;
+}
+
+/* Wizard tam ekran */
+#standWizardModal {
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+#standWizardModal .modal-sheet {
+  border-radius: 0;
+  max-height: 100vh;
+  height: 100vh;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.modal-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+/* ── FUAR CARD ── */
+.fuar-card {
+  border: 1px solid transparent;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.fuar-card:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.fuar-card.past-fuar { opacity: 0.4; }
+
+.fuar-card-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.fuar-card-name {
+  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  flex: 1;
+  padding-right: 8px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.fuar-card-date {
+  font-size: 15px;
+  color: rgba(255,255,255,0.85);
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.venue-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  font-weight: 700;
+  background: rgba(0,0,0,0.25) !important;
+  color: #fff !important;
+}
+
+/* ── SIPARIS CARD ── */
+.siparis-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.siparis-card:hover { border-color: rgba(255,255,255,0.15); }
+
+.siparis-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.siparis-musteri {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.siparis-tutar {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.siparis-meta {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex; gap: 8px; flex-wrap: wrap;
+  align-items: center;
+  margin-top: 2px;
+}
+
+/* ── STOK CARD ── */
+.stok-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.stok-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+
+.stok-name {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stok-counts {
+  text-align: right;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.stok-counts strong {
+  font-size: 18px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  display: block;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .4s ease;
+}
+
+/* ── MUSTERI CARD ── */
+.musteri-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex; align-items: center; gap: 14px;
+}
+.musteri-card:hover { border-color: rgba(255,255,255,0.15); }
+
+.musteri-avatar {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.musteri-info { flex: 1; }
+
+.musteri-name {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 3px;
+}
+
+.musteri-meta { font-size: 12px; color: var(--muted); }
+
+/* ── NOT CARD ── */
+.not-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.not-card:hover { border-color: rgba(255,255,255,0.15); }
+
+.not-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.not-meta { font-size: 10px; color: var(--muted); display: flex; gap: 10px; }
+
+/* ── SEARCH BAR ── */
+.search-bar {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  padding: 11px 14px 11px 38px;
+  outline: none;
+  transition: border-color .2s;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
+
+/* ── FAB ── */
+.fab {
+  position: fixed;
+  bottom: calc(var(--tab-h) + 16px);
+  right: 16px;
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 24px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+  transition: all .2s;
+  z-index: 40;
+}
+.fab:hover { background: #7c74ff; transform: translateY(-2px); }
+
+/* ── ALARM SECTION ── */
+.alarm-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.alarm-row:last-child { border-bottom: none; }
+
+.toggle {
+  width: 44px; height: 24px;
+  background: var(--surface2);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: background .2s;
+}
+.toggle.on { background: var(--accent); border-color: var(--accent); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform .2s;
+}
+.toggle.on::after { transform: translateX(20px); }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* ── MONTH CHIP ── */
+.month-chips {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
+  margin-bottom: 16px; scrollbar-width: none;
+}
+.month-chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .2s;
+  font-family: 'Roboto', sans-serif;
+}
+.chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: calc(var(--tab-h) + 80px);
+  left: 50%; transform: translateX(-50%);
+  background: #1e1e32;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 12px;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity .3s;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-text { font-size: 13px; line-height: 1.5; }
+
+/* ── FUAR DETAIL ── */
+.fuar-detail-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label { color: var(--muted); }
+.detail-val { color: var(--text); font-weight: 500; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="app-logo">BEYOĞLU <span>ELEKTRİK</span></div>
+  <div class="header-actions">
+    <div class="icon-btn" onclick="showNotifInfo()" title="Bildirimler">🔔</div>
+    <div class="icon-btn" id="syncBtn" onclick="syncStatus()" title="Sync">☁️</div>
+  </div>
+</header>
+
+<!-- PAGES -->
+
+<!-- 1. DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="section-title">Bilgi Ekranı</div>
+  <div class="section-sub" id="todayDate">—</div>
+
+  <div class="stat-grid" id="dashStats">
+    <div class="stat-card">
+      <div class="stat-val" id="dSiparis">0</div>
+      <div class="stat-lbl">Onaylı Proje</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="dCiro" style="font-size:20px">—</div>
+      <div class="stat-lbl" id="dCiroLbl">Kuruluma Kalan</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="dFuar">0</div>
+      <div class="stat-lbl">Aktif Fuar</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="dMusteri">0</div>
+      <div class="stat-lbl">Müşteri</div>
+    </div>
+  </div>
+
+  <div id="kurulumBanner"></div>
+
+  <div style="margin-bottom:8px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:2px;">Yaklaşan Fuarlar</div>
+  <div id="dashFuarlar"></div>
+
+  <div class="divider"></div>
+  <div style="margin-bottom:8px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:2px;">Yakındaki Onaylı Projeler</div>
+  <div id="dashSiparisler"></div>
+</div>
+
+<!-- 2. FUAR TAKVİMİ -->
+<div class="page" id="page-fuarlar">
+  <div class="section-title">Fuar Takvimi</div>
+  <div class="section-sub">2026 · İstanbul</div>
+
+  <div class="month-chips" id="monthChips"></div>
+  <div id="fuarList"></div>
+</div>
+
+<!-- 3. ONAYLI PROJEler -->
+<div class="page" id="page-siparisler">
+  <div class="section-title">Onaylı Projeler</div>
+  <div class="section-sub" id="siparisSub">Fuar bazında onaylı stand projeleri</div>
+
+  <div class="month-chips" id="sipStatusFilter">
+    <div class="chip active" onclick="setProjeFuarFilter('hepsi',this)">Tüm Fuarlar</div>
+  </div>
+
+  <div id="siparisList"></div>
+</div>
+
+<!-- 4. STOK -->
+<div class="page" id="page-stok">
+  <div class="section-title">Stok</div>
+  <div class="section-sub" id="stokSub">Max 20 kalem</div>
+  <div id="stokList"></div>
+</div>
+
+<!-- 5. MÜŞTERİLER -->
+<div class="page" id="page-musteriler">
+  <div class="section-title">Müşteriler</div>
+  <div class="section-sub" id="musteriSub">Yükleniyor...</div>
+
+  <div class="search-bar">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="musteriSearch" placeholder="Firma veya yetkili ara..." oninput="renderMusteriler()">
+  </div>
+
+  <div id="musteriList"></div>
+</div>
+
+<!-- 6. NOTLAR -->
+<div class="page" id="page-notlar">
+  <div class="section-title">Notlar</div>
+  <div class="section-sub" id="notSub">Yükleniyor...</div>
+  <div id="notList"></div>
+</div>
+
+<!-- 7. ONAYLI PROJELER - siparisler sekmesinde gösteriliyor -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="tab-btn active" onclick="showPage('dashboard',this)">
+    <span class="tab-icon">📊</span>
+    <span class="tab-label">Ana</span>
+  </button>
+  <button class="tab-btn" onclick="showPage('fuarlar',this)">
+    <span class="tab-icon">📅</span>
+    <span class="tab-label">Fuarlar</span>
+  </button>
+  <button class="tab-btn" onclick="showPage('siparisler',this)">
+    <span class="tab-icon">✅</span>
+    <span class="tab-label">Onaylı</span>
+  </button>
+  <button class="tab-btn" onclick="showPage('stok',this)">
+    <span class="tab-icon">📦</span>
+    <span class="tab-label">Stok</span>
+  </button>
+  <button class="tab-btn" onclick="showPage('musteriler',this)">
+    <span class="tab-icon">📇</span>
+    <span class="tab-label">Müşteri</span>
+  </button>
+</nav>
+
+<!-- FAB -->
+<button class="fab" id="fabBtn" onclick="openAddModal()">＋</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Sipariş Ekle/Düzenle -->
+<div class="modal-overlay" id="sipModal" onclick="closeModal('sipModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="sipModalTitle">Yeni Sipariş</div>
+    <input type="hidden" id="sipEditId">
+    <div class="form-group">
+      <label class="form-label">Müşteri *</label>
+      <select class="form-select" id="sipMusteri">
+        <option value="">— Müşteri Seç —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ürün / Stok Kalemi *</label>
+      <select class="form-select" id="sipUrun">
+        <option value="">— Ürün Seç —</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group">
+        <label class="form-label">Adet *</label>
+        <input type="number" class="form-input" id="sipAdet" placeholder="1" min="1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tutar (₺) *</label>
+        <input type="number" class="form-input" id="sipTutar" placeholder="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fuar</label>
+      <select class="form-select" id="sipFuar">
+        <option value="">— Fuar Seç —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Durum</label>
+      <select class="form-select" id="sipDurum">
+        <option value="bekliyor">⏳ Bekliyor</option>
+        <option value="onaylandi">✅ Onaylandı</option>
+        <option value="teslim">📦 Teslim Edildi</option>
+        <option value="iptal">❌ İptal</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Not</label>
+      <textarea class="form-textarea" id="sipNot" placeholder="Sipariş notu..."></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeModal('sipModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveSiparis()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stok Ekle/Düzenle -->
+<div class="modal-overlay" id="stokModal" onclick="closeModal('stokModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="stokModalTitle">Stok Kalemi</div>
+    <input type="hidden" id="stokEditId">
+    <div class="form-group">
+      <label class="form-label">Ürün Adı *</label>
+      <input type="text" class="form-input" id="stokAd" placeholder="Ürün adı">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group">
+        <label class="form-label">Toplam Stok</label>
+        <input type="number" class="form-input" id="stokTop" placeholder="100" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mevcut Stok</label>
+        <input type="number" class="form-input" id="stokMev" placeholder="100" min="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Birim Fiyat (₺)</label>
+      <input type="number" class="form-input" id="stokFiyat" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Kategori</label>
+      <input type="text" class="form-input" id="stokKat" placeholder="örn: Mobilya, Aksesuar...">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeModal('stokModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveStok()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Müşteri Ekle/Düzenle -->
+<div class="modal-overlay" id="musteriModal" onclick="closeModal('musteriModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="musteriModalTitle">Yeni Müşteri</div>
+    <input type="hidden" id="musteriEditId">
+    <div class="form-group">
+      <label class="form-label">Firma Adı *</label>
+      <input type="text" class="form-input" id="mFirma" placeholder="Firma adı">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Yetkili Kişi</label>
+      <input type="text" class="form-input" id="mYetkili" placeholder="Ad Soyad">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Telefon</label>
+      <input type="tel" class="form-input" id="mTel" placeholder="05xx xxx xx xx">
+    </div>
+    <div class="form-group">
+      <label class="form-label">E-posta</label>
+      <input type="email" class="form-input" id="mEmail" placeholder="@">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Şehir</label>
+      <input type="text" class="form-input" id="mSehir" placeholder="İstanbul">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Not</label>
+      <textarea class="form-textarea" id="mNot" placeholder="Müşteri notu..."></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeModal('musteriModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveMusteri()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Not Ekle -->
+<div class="modal-overlay" id="notModal" onclick="closeModal('notModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Not Ekle</div>
+    <input type="hidden" id="notEditId">
+    <div class="form-group">
+      <label class="form-label">Not *</label>
+      <textarea class="form-textarea" id="notText" placeholder="Notunuzu yazın..." style="min-height:120px"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fuar (opsiyonel)</label>
+      <select class="form-select" id="notFuar">
+        <option value="">— Fuara Bağla —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Müşteri (opsiyonel)</label>
+      <select class="form-select" id="notMusteri">
+        <option value="">— Müşteriye Bağla —</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeModal('notModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveNot()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fuar Detay -->
+<div class="modal-overlay" id="fuarDetailModal" onclick="closeModal('fuarDetailModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="fuarDetailContent"></div>
+  </div>
+</div>
+
+<!-- Sipariş Detay -->
+<div class="modal-overlay" id="sipDetailModal" onclick="closeModal('sipDetailModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="sipDetailContent"></div>
+  </div>
+</div>
+
+<!-- Stand Wizard -->
+<div class="modal-overlay" id="standWizardModal" onclick="closeModal('standWizardModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="standWizardContent"></div>
+  </div>
+</div>
+
+<!-- Dosya Görüntüle -->
+<div class="modal-overlay" id="dosyaModal" style="align-items:stretch;justify-content:stretch">
+  <div style="background:#000;width:100%;height:100%;display:flex;flex-direction:column;position:relative">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(0,0,0,0.9);border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0">
+      <div id="dosyaModalTitle" style="color:#fff;font-size:14px;font-family:'Roboto',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1"></div>
+      <button onclick="closeModal('dosyaModal')" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0;margin-left:10px">×</button>
+    </div>
+    <div id="dosyaModalContent" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:10px"></div>
+  </div>
+</div>
+
+<!-- Müşteri Detay -->
+<div class="modal-overlay" id="musteriDetailModal" onclick="closeModal('musteriDetailModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="musteriDetailContent"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ FIREBASE + APP LOGIC ═══════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDS4iqkq8ZcmWBj4P6gZB6tTfBxyGVzzTs",
+  authDomain: "beyoglu-apk.firebaseapp.com",
+  projectId: "beyoglu-apk",
+  storageBucket: "beyoglu-apk.firebasestorage.app",
+  messagingSenderId: "455031776116",
+  appId: "1:455031776116:web:e6b6fc8b812e58f7e70221"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// ── STATE ──
+window.STATE = {
+  siparisler: [],
+  stoklar: [],
+  musteriler: [],
+  notlar: [],
+  standProjeler: [],
+  activePage: 'dashboard',
+  sipFilter: 'hepsi',
+  projeFuarFilter: 'hepsi',
+  fuarMonthFilter: 'Tümü',
+  fuarDetailTab: 'ozet', // ozet | siparisler | stand | notlar
+  standWizard: null, // aktif wizard state
+};
+
+// ── FUAR VERİSİ ──
+const FUARLAR = [
+  // NİSAN (devam edenler + yaklaşanlar)
+  { id:'f1',  name:"Ekspomed Eurasia – Tıbbi Cihazlar",        start:[2026,3,15], end:[2026,3,18], venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f2',  name:"IDEX İstanbul – Dental Fuar",              start:[2026,3,15], end:[2026,3,18], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f3',  name:"Franchise İstanbul Expo",                  start:[2026,3,16], end:[2026,3,19], venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f4',  name:"Motobike Istanbul",                        start:[2026,3,22], end:[2026,3,25], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f5',  name:"Eurobike Istanbul",                        start:[2026,3,22], end:[2026,3,25], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f6',  name:"AYSAF – Ayakkabı Yan Sanayi",              start:[2026,3,22], end:[2026,3,25], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f7',  name:"ELES Expo – Elektrik & Akıllı Teknoloji",  start:[2026,3,23], end:[2026,3,25], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f8',  name:"Fastener Expo Eurasia",                    start:[2026,3,27], end:[2026,3,30], venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f9',  name:"Turkeybuild – 48. Yapı Fuarı",             start:[2026,3,27], end:[2026,3,30], venue:"TÜYAP",        vColor:"#f76a8a" },
+  // MAYIS
+  { id:'f10', name:"NaturFest – Kamp, Karavan & Outdoor",      start:[2026,3,30], end:[2026,4,3],  venue:"Kadir Topbaş", vColor:"#f7c96a" },
+  { id:'f11', name:"SAHA Expo – Savunma & Havacılık",          start:[2026,4,5],  end:[2026,4,9],  venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f12', name:"TOS+H Expo – İş Güvenliği",                start:[2026,4,6],  end:[2026,4,8],  venue:"Kongre",       vColor:"#a8e063" },
+  { id:'f13', name:"Beauty İstanbul – Kozmetik & Güzellik",    start:[2026,4,7],  end:[2026,4,9],  venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f14', name:"Coffex İstanbul – Kahve Festivali",        start:[2026,4,8],  end:[2026,4,10], venue:"Lütfi Kırdar", vColor:"#4ecdc4" },
+  { id:'f15', name:"World Sports Istanbul",                    start:[2026,4,8],  end:[2026,4,10], venue:"Kadir Topbaş", vColor:"#f7c96a" },
+  { id:'f16', name:"Artcontact İstanbul – Çağdaş Sanat",       start:[2026,4,13], end:[2026,4,17], venue:"Kadir Topbaş", vColor:"#f7c96a" },
+  { id:'f17', name:"Hometex 2026 – Ev Tekstili",               start:[2026,4,19], end:[2026,4,22], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f18', name:"Automechanika Istanbul",                   start:[2026,4,21], end:[2026,4,24], venue:"TÜYAP",        vColor:"#f76a8a" },
+  // HAZİRAN
+  { id:'f19', name:"Komatek 2026 – İş & İnşaat Makineleri",   start:[2026,5,3],  end:[2026,5,6],  venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f20', name:"24. İstanbul Perakende Fuarı",             start:[2026,5,3],  end:[2026,5,4],  venue:"Haliç",        vColor:"#c96af7" },
+  { id:'f21', name:"İstanbul Av, Silah & Doğa Sporları",       start:[2026,5,3],  end:[2026,5,6],  venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f22', name:"ITM 2026 – Tekstil Makineleri",            start:[2026,5,9],  end:[2026,5,13], venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f23', name:"Hightex 2026 – Teknik Tekstil",            start:[2026,5,9],  end:[2026,5,13], venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f24', name:"Win Eurasia 2026",                         start:[2026,5,10], end:[2026,5,13], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f25', name:"Paper Eurasia – Kağıt & Ambalaj",          start:[2026,5,10], end:[2026,5,12], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f26', name:"Worldef – E-Ticaret Fuarı",                start:[2026,5,11], end:[2026,5,13], venue:"Kadir Topbaş", vColor:"#f7c96a" },
+  { id:'f27', name:"Busworld Türkiye 2026",                    start:[2026,5,17], end:[2026,5,19], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f28', name:"PaintIstanbul 2026",                       start:[2026,5,17], end:[2026,5,19], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f29', name:"Powder & Dosing Expo",                     start:[2026,5,17], end:[2026,5,19], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f30', name:"IDMA – Un & Değirmen Makineleri",          start:[2026,5,25], end:[2026,5,27], venue:"İFM",          vColor:"#4f9cf8" },
+  // TEMMUZ
+  { id:'f31', name:"F İstanbul – Gıda & İçecek Fuarı",         start:[2026,6,1],  end:[2026,6,4],  venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f32', name:"18. Umre & Turizm Fuarı",                  start:[2026,6,6],  end:[2026,6,7],  venue:"Lütfi Kırdar", vColor:"#4ecdc4" },
+  { id:'f33', name:"Umre ve Turizm Profesyoneller Fuarı",       start:[2026,6,11], end:[2026,6,12], venue:"Lütfi Kırdar", vColor:"#4ecdc4" },
+  // AĞUSTOS
+  { id:'f34', name:"IFCO – İstanbul Fashion Connection (Güz)", start:[2026,7,19], end:[2026,7,21], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f35', name:"F İstanbul – Gıda (Güz)",                  start:[2026,7,26], end:[2026,7,29], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f36', name:"İnşaat Endüstrisi İhracat Fuarı – CF",     start:[2026,7,27], end:[2026,7,29], venue:"İFM",          vColor:"#4f9cf8" },
+  // EYLÜL
+  { id:'f37', name:"Foodist 2026 – Gıda & İçecek",             start:[2026,8,1],  end:[2026,8,4],  venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f38', name:"Comvex – Ticari Araçlar",                  start:[2026,8,1],  end:[2026,8,4],  venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f39', name:"Beauty Eurasia – Kozmetik & Güzellik",     start:[2026,8,2],  end:[2026,8,4],  venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f40', name:"Texhibition İstanbul – Kumaş & Denim",     start:[2026,8,9],  end:[2026,8,11], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f41', name:"Promosyon Show İstanbul",                  start:[2026,8,9],  end:[2026,8,12], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f42', name:"Zuchex – Ev & Mutfak Eşyaları",            start:[2026,8,9],  end:[2026,8,12], venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f43', name:"17. Perakende Zirvesi",                    start:[2026,8,9],  end:[2026,8,10], venue:"Haliç",        vColor:"#c96af7" },
+  { id:'f44', name:"Electricity Eurasia – Elektrik Fuarı",     start:[2026,8,16], end:[2026,8,18], venue:"Kadir Topbaş", vColor:"#f7c96a" },
+  { id:'f45', name:"Metal Expo Eurasia",                       start:[2026,8,16], end:[2026,8,19], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f46', name:"IBIA Expo – Yatak Yan Sanayi",             start:[2026,8,16], end:[2026,8,19], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f47', name:"Intermob – Mobilya Yan Sanayi",            start:[2026,8,17], end:[2026,8,20], venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f48', name:"AYMOD – Ayakkabı Moda Fuarı (Güz)",        start:[2026,8,23], end:[2026,8,26], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f49', name:"MÜSİAD Expo 2026",                         start:[2026,8,23], end:[2026,8,26], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f50', name:"FDI – Mobilya Tasarım Fuarı",              start:[2026,8,24], end:[2026,8,26], venue:"İFM",          vColor:"#4f9cf8" },
+  // EKİM
+  { id:'f51', name:"Maktek Avrasya – Takım Tezgahları",        start:[2026,8,28], end:[2026,9,3],  venue:"TÜYAP",        vColor:"#f76a8a" },
+  { id:'f52', name:"IJS Jewelry Show 60. – Mücevher",          start:[2026,8,30], end:[2026,9,3],  venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f53', name:"Craftistanbul – El Sanatları",             start:[2026,9,1],  end:[2026,9,4],  venue:"Kadir Topbaş", vColor:"#f7c96a" },
+  { id:'f54', name:"Data Center Eurasia",                      start:[2026,9,7],  end:[2026,9,10], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f55', name:"ISAF Smartex – Akıllı Şehirler",           start:[2026,9,7],  end:[2026,9,10], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f56', name:"ISAF International – Güvenlik & Yangın",   start:[2026,9,7],  end:[2026,9,10], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f57', name:"Petzoo Eurasia – Evcil Hayvan",            start:[2026,9,7],  end:[2026,9,10], venue:"İFM",          vColor:"#4f9cf8" },
+  { id:'f58', name:"Mobidictum Conference",                    start:[2026,9,7],  end:[2026,9,8],  venue:"Lütfi Kırdar", vColor:"#4ecdc4" },
+  // KASIM
+  { id:'f59', name:"TÜYAP Kitap Fuarı",                        start:[2026,10,5], end:[2026,10,8], venue:"TÜYAP",        vColor:"#f76a8a" },
+  // ARALIK
+  { id:'f60', name:"Karavanist İstanbul (Kış)",                start:[2026,11,3], end:[2026,11,6], venue:"TÜYAP",        vColor:"#f76a8a" },
+];
+
+FUARLAR.forEach(f => {
+  f.startDate = new Date(f.start[0], f.start[1], f.start[2]);
+  f.endDate   = new Date(f.end[0],   f.end[1],   f.end[2]);
+  f.monthName = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][f.start[1]];
+});
+
+window.FUARLAR = FUARLAR;
+
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+function fmtD(d) { return d.getDate().toString().padStart(2,'0')+'.'+(d.getMonth()+1).toString().padStart(2,'0'); }
+function fuarStatus(f) {
+  if (f.startDate <= TODAY && f.endDate >= TODAY) return 'active';
+  if (f.startDate > TODAY) return 'upcoming';
+  return 'past';
+}
+
+// ── FIRESTORE LISTENERS ──
+onSnapshot(query(collection(db,'siparisler'), orderBy('createdAt','desc')), snap => {
+  STATE.siparisler = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderSiparisler();
+  updateDashboard();
+});
+
+onSnapshot(collection(db,'stoklar'), snap => {
+  STATE.stoklar = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderStok();
+  populateUrunSelect();
+});
+
+onSnapshot(collection(db,'musteriler'), snap => {
+  STATE.musteriler = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderMusteriler();
+  populateMusteriSelects();
+});
+
+onSnapshot(query(collection(db,'notlar'), orderBy('createdAt','desc')), snap => {
+  STATE.notlar = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderNotlar();
+});
+
+onSnapshot(collection(db,'standProjeler'), snap => {
+  STATE.standProjeler = snap.docs.map(d => ({id:d.id,...d.data()}));
+  updateDashboard();
+  renderFuarlar();
+  if (STATE.activePage === 'siparisler') renderOnayliProjeler();
+  if (STATE.activeFuarId && document.getElementById('fuarDetailModal')?.classList.contains('open')) {
+    renderFuarDetailModal(STATE.activeFuarId);
+  }
+});
+
+// ── PAGE NAVIGATION ──
+window.showPage = function(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if (btn) btn.classList.add('active');
+  STATE.activePage = page;
+  updateFab();
+  if (page === 'notlar') renderNotlar();
+  if (page === 'siparisler') renderOnayliProjeler();
+};
+
+function updateFab() {
+  const fab = document.getElementById('fabBtn');
+  const p = STATE.activePage;
+  if (['dashboard','fuarlar'].includes(p)) { fab.style.display='none'; return; }
+  fab.style.display='flex';
+  fab.onclick = () => {
+    if (p==='siparisler') openSipModal();
+    else if (p==='stok') openStokModal();
+    else if (p==='musteriler') openMusteriModal();
+    else if (p==='notlar') openNotModal();
+  };
+}
+
+window.openAddModal = function() {
+  const p = STATE.activePage;
+  if (p==='siparisler') openSipModal();
+  else if (p==='stok') openStokModal();
+  else if (p==='musteriler') openMusteriModal();
+  else if (p==='notlar') openNotModal();
+};
+
+// ── MODAL HELPERS ──
+window.closeModal = function(id, e) {
+  if (!e || e.target === document.getElementById(id)) {
+    document.getElementById(id).classList.remove('open');
+  }
+};
+
+function openM(id) { document.getElementById(id).classList.add('open'); }
+
+// ── TOAST ──
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+};
+
+// ── POPULATE SELECTS ──
+function populateMusteriSelects() {
+  ['sipMusteri','notMusteri'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">— Müşteri Seç —</option>`;
+    STATE.musteriler.forEach(m => {
+      sel.innerHTML += `<option value="${m.id}">${m.firma}</option>`;
+    });
+    sel.value = cur;
+  });
+}
+
+function populateUrunSelect() {
+  const sel = document.getElementById('sipUrun');
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">— Ürün Seç —</option>`;
+  STATE.stoklar.forEach(s => {
+    sel.innerHTML += `<option value="${s.id}">${s.ad} (Stok: ${s.mevcut})</option>`;
+  });
+  sel.innerHTML += `<option value="diger">Diğer / Manuel</option>`;
+  sel.value = cur;
+}
+
+function populateFuarSelects() {
+  const upcoming = FUARLAR.filter(f => fuarStatus(f) !== 'past');
+  ['sipFuar','notFuar'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">— Fuar Seç —</option>`;
+    upcoming.forEach(f => {
+      sel.innerHTML += `<option value="${f.id}">${f.name} (${fmtD(f.startDate)})</option>`;
+    });
+    sel.value = cur;
+  });
+}
+
+// ── DASHBOARD ──
+function updateDashboard() {
+  const now = TODAY;
+  const activeFuarlar = FUARLAR.filter(f => fuarStatus(f) === 'active');
+  const upcomingFuarlar = FUARLAR.filter(f => fuarStatus(f) === 'upcoming').slice(0,3);
+
+  document.getElementById('todayDate').textContent =
+    now.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[now.getMonth()]+' '+now.getFullYear();
+
+  document.getElementById('dSiparis').textContent = STATE.standProjeler.filter(p=>p.onaylandi).length;
+  const ciro = STATE.siparisler.reduce((s,x)=>s+(parseFloat(x.tutar)||0),0);
+  // Kurulum günü hesabı (fuar başlangıcından 3 gün önce)
+  const KURULUM_ONCESI = 3;
+  const yakinFuar = FUARLAR
+    .filter(f => f.startDate >= TODAY)
+    .sort((a,b) => a.startDate - b.startDate)[0];
+
+  const banner = document.getElementById('kurulumBanner');
+
+  if (yakinFuar) {
+    const kurulumTarihi = new Date(yakinFuar.startDate);
+    kurulumTarihi.setDate(kurulumTarihi.getDate() - KURULUM_ONCESI);
+    const kurulumGun = Math.ceil((kurulumTarihi - TODAY) / 86400000);
+    const fuarGun = Math.ceil((yakinFuar.startDate - TODAY) / 86400000);
+
+    // Kutucuk
+    const el = document.getElementById('dCiro');
+    const lbl = document.getElementById('dCiroLbl');
+    if (kurulumGun <= 0) {
+      el.textContent = 'Bugün!';
+      el.style.color = 'var(--red)';
+      lbl.textContent = '🔨 Kurulum Günü!';
+    } else if (kurulumGun <= 3) {
+      el.textContent = kurulumGun + ' gün';
+      el.style.color = 'var(--red)';
+      lbl.textContent = '🔨 Kuruluma Kalan';
+    } else if (kurulumGun <= 7) {
+      el.textContent = kurulumGun + ' gün';
+      el.style.color = 'var(--yellow)';
+      lbl.textContent = '🔨 Kuruluma Kalan';
+    } else {
+      el.textContent = kurulumGun + ' gün';
+      el.style.color = '#fff';
+      lbl.textContent = '🔨 Kuruluma Kalan';
+    }
+
+    // Banner
+    if (kurulumGun <= 7 && banner) {
+      const bannerColor = kurulumGun <= 0 ? 'rgba(252,92,101,0.15)' : kurulumGun <= 3 ? 'rgba(252,92,101,0.1)' : 'rgba(247,183,49,0.1)';
+      const borderColor = kurulumGun <= 3 ? 'var(--red)' : 'var(--yellow)';
+      const msg = kurulumGun <= 0
+        ? `🔨 Bugün kurulum günü! → <b>${yakinFuar.name.split('–')[0].trim()}</b>`
+        : kurulumGun === 1
+        ? `🔨 Yarın kurulum! → <b>${yakinFuar.name.split('–')[0].trim()}</b>`
+        : `🔨 <b>${kurulumGun} gün sonra kurulum</b> → ${yakinFuar.name.split('–')[0].trim()}`;
+      banner.innerHTML = `
+        <div style="background:${bannerColor};border:1px solid ${borderColor};border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#fff;line-height:1.4">
+          ${msg}
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Fuar: ${fmtD(yakinFuar.startDate)} · Kurulum: ${fmtD(kurulumTarihi)}</div>
+        </div>`;
+    } else if (banner) {
+      banner.innerHTML = '';
+    }
+  } else {
+    document.getElementById('dCiro').textContent = '—';
+    if (banner) banner.innerHTML = '';
+  }
+  document.getElementById('dFuar').textContent = activeFuarlar.length;
+  document.getElementById('dMusteri').textContent = STATE.musteriler.length;
+
+  const df = document.getElementById('dashFuarlar');
+  const showFuarlar = [...activeFuarlar, ...upcomingFuarlar].slice(0,4);
+  if (!showFuarlar.length) {
+    df.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Yaklaşan fuar yok</div></div>`;
+  } else {
+    df.innerHTML = showFuarlar.map(f => {
+      const st = fuarStatus(f);
+      const sokumGun = st==='active' ? Math.ceil((f.endDate - TODAY) / 86400000) : 0;
+      const bg = st==='past'
+        ? 'background:rgba(30,30,50,0.8);border-color:rgba(255,255,255,0.06)'
+        : `background:linear-gradient(135deg, ${f.vColor}55 0%, ${f.vColor}22 100%);border-color:${f.vColor}66`;
+      return `<div class="fuar-card ${st}-fuar" style="${bg}" onclick="openFuarDetail('${f.id}')">
+        <div class="fuar-card-header">
+          <div class="fuar-card-name">${f.name}</div>
+          ${st==='active' ? '<span class="badge badge-green">🟢 FUAR AÇIK</span>' : st==='upcoming' ? '<span class="badge" style="background:rgba(0,0,0,0.3);color:#fff">'+Math.ceil((f.startDate-TODAY)/86400000)+' gün sonra</span>' : '<span class="badge" style="background:rgba(0,0,0,0.2);color:rgba(255,255,255,0.4)">Geçti</span>'}
+        </div>
+        <div class="fuar-card-date">
+          <span>${fmtD(f.startDate)} → ${fmtD(f.endDate)}</span>
+          <span class="venue-tag">${f.venue}</span>
+        </div>
+        ${st==='active' ? `<div style="margin-top:8px;font-size:12px;color:#ffcccc;font-weight:700;">⏳ Söküme ${sokumGun} gün kaldı</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  const ds = document.getElementById('dashSiparisler');
+
+  // Yakındaki 5 fuarı bul
+  const yakinFuarlar = FUARLAR
+    .filter(f => f.endDate >= TODAY)
+    .sort((a,b) => a.startDate - b.startDate)
+    .slice(0, 5);
+
+  // Bu fuarlarda onaylı projesi olanları filtrele
+  const fuarlarWithProje = yakinFuarlar.filter(f =>
+    STATE.standProjeler.some(p => p.onaylandi && p.fuarId === f.id)
+  );
+
+  if (!fuarlarWithProje.length) {
+    ds.innerHTML = `<div class="empty-state"><div class="empty-icon">🏗️</div><div class="empty-text">Yakındaki fuarlarda onaylı proje yok</div></div>`;
+  } else {
+    ds.innerHTML = fuarlarWithProje.map(f => {
+      const st = fuarStatus(f);
+      const projeler = STATE.standProjeler.filter(p => p.onaylandi && p.fuarId === f.id);
+      const gunFark = Math.ceil((f.startDate - TODAY) / 86400000);
+      const fuarLabel = st==='active'
+        ? `<span style="background:rgba(38,222,129,0.2);color:var(--green);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">🟢 Devam ediyor</span>`
+        : `<span style="background:rgba(108,99,255,0.2);color:var(--accent);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${gunFark} gün sonra</span>`;
+      return `<div class="card" style="margin-bottom:8px;border-left:3px solid ${f.vColor};cursor:pointer" onclick="openFuarDetail('${f.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-family:'Roboto',sans-serif;font-size:14px;font-weight:800;color:#fff">${f.name}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+          📅 ${fmtD(f.startDate)} → ${fmtD(f.endDate)} · <span style="color:${f.vColor}">${f.venue}</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          ${fuarLabel}
+          <span style="background:rgba(38,222,129,0.15);color:var(--green);padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700">✅ ${projeler.length} onaylı proje</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ── FUARLAR ──
+window.renderFuarlar = function() {
+  const chips = document.getElementById('monthChips');
+  const months = ['Tümü','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  chips.innerHTML = months.map(m =>
+    `<div class="chip ${STATE.fuarMonthFilter===m?'active':''}" onclick="setFuarMonth('${m}',this)">${m}</div>`
+  ).join('');
+
+  let list = FUARLAR;
+  if (STATE.fuarMonthFilter !== 'Tümü') list = list.filter(f => f.monthName === STATE.fuarMonthFilter);
+
+  document.getElementById('fuarList').innerHTML = list.map(f => {
+    const st = fuarStatus(f);
+    const tumProjeler = STATE.standProjeler.filter(p => p.fuarId === f.id);
+    const onayliProjeler = tumProjeler.filter(p => p.onaylandi);
+    const sokumGun = st==='active' ? Math.ceil((f.endDate - TODAY) / 86400000) : 0;
+    const bg = st==='past'
+      ? 'background:rgba(30,30,50,0.8);border-color:rgba(255,255,255,0.06)'
+      : `background:linear-gradient(135deg, ${f.vColor}55 0%, ${f.vColor}22 100%);border-color:${f.vColor}66`;
+    return `<div class="fuar-card ${st}-fuar" style="${bg}" onclick="openFuarDetail('${f.id}')">
+      <div class="fuar-card-header">
+        <div class="fuar-card-name">${f.name}</div>
+        ${st==='active' ? '<span class="badge badge-green">🟢 FUAR AÇIK</span>' : st==='upcoming' ? '<span class="badge" style="background:rgba(0,0,0,0.3);color:#fff">'+Math.ceil((f.startDate-TODAY)/86400000)+' gün sonra</span>' : '<span class="badge" style="background:rgba(0,0,0,0.2);color:rgba(255,255,255,0.4)">Geçti</span>'}
+      </div>
+      <div class="fuar-card-date">
+        <span>${fmtD(f.startDate)} → ${fmtD(f.endDate)}</span>
+        <span class="venue-tag">${f.venue}</span>
+      </div>
+      ${tumProjeler.length > 0 ? `
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          ${onayliProjeler.length > 0 ? `
+            <span style="background:rgba(38,222,129,0.25);color:#26de81;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">
+              ✅ ${onayliProjeler.length} onaylı proje
+            </span>` : ''}
+          ${tumProjeler.length - onayliProjeler.length > 0 ? `
+            <span style="background:rgba(247,183,49,0.2);color:#f7b731;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">
+              ⏳ ${tumProjeler.length - onayliProjeler.length} bekliyor
+            </span>` : ''}
+        </div>` : ''}
+      ${st==='active' ? `<div style="margin-top:8px;font-size:12px;color:#ffcccc;font-weight:700;">⏳ Söküme ${sokumGun} gün kaldı</div>` : ''}
+    </div>`;
+  }).join('');
+};
+
+window.setFuarMonth = function(m) {
+  STATE.fuarMonthFilter = m;
+  renderFuarlar();
+};
+
+window.openFuarDetail = function(fid) {
+  const f = FUARLAR.find(x=>x.id===fid);
+  if (!f) return;
+  STATE.activeFuarId = fid;
+  STATE.fuarDetailTab = 'ozet';
+  populateFuarSelects();
+  renderFuarDetailModal(fid);
+  openM('fuarDetailModal');
+};
+
+function renderFuarDetailModal(fid) {
+  const f = FUARLAR.find(x=>x.id===fid);
+  if (!f) return;
+  const tab = STATE.fuarDetailTab;
+  const fuarSiparisler = STATE.siparisler.filter(s => s.fuarId === fid);
+  const totalTutar = fuarSiparisler.reduce((s,x)=>s+(parseFloat(x.tutar)||0),0);
+  const st = fuarStatus(f);
+  const fuarNotlar = STATE.notlar.filter(n => n.fuarId === fid);
+  const fuarStandlar = STATE.standProjeler.filter(p => p.fuarId === fid);
+
+  const tabs = [
+    {key:'ozet', label:'📋 Özet'},
+    {key:'siparisler', label:'🛒 Sipariş'},
+    {key:'stand', label:'🏗️ Stand'},
+    {key:'notlar', label:'📝 Not'},
+  ];
+
+  const tabBar = `<div style="display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none">
+    ${tabs.map(t => `
+      <button onclick="switchFuarTab('${t.key}','${fid}')" style="
+        flex-shrink:0;padding:7px 12px;border-radius:20px;border:none;
+        font-family:'Roboto',monospace;font-size:11px;cursor:pointer;
+        background:${tab===t.key?f.vColor:'rgba(255,255,255,0.07)'};
+        color:${tab===t.key?'#fff':'rgba(255,255,255,0.5)'};
+        font-weight:${tab===t.key?'700':'400'};
+        transition:all .2s;
+      ">${t.label}</button>
+    `).join('')}
+  </div>`;
+
+  let content = '';
+
+  if (tab === 'ozet') {
+    const onayliStandlar = fuarStandlar.filter(p => p.onaylandi);
+
+    content = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div class="stat-card" style="cursor:pointer;border:1px solid ${onayliStandlar.length>0?'rgba(38,222,129,0.3)':'var(--border)'}" onclick="switchFuarTab('stand','${fid}')">
+          <div class="stat-val" style="color:${onayliStandlar.length>0?'var(--green)':'#fff'}">${onayliStandlar.length}</div>
+          <div class="stat-lbl">Onaylı Proje</div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="switchFuarTab('notlar','${fid}')">
+          <div class="stat-val">${fuarNotlar.length}</div>
+          <div class="stat-lbl">Not</div>
+        </div>
+      </div>
+
+      ${onayliStandlar.length > 0 ? `
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">✅ Onaylı Stand Projeleri</div>
+        ${onayliStandlar.map(p => {
+          const m = STATE.musteriler.find(x=>x.id===p.musteriId);
+          return `<div style="background:rgba(38,222,129,0.08);border:1px solid rgba(38,222,129,0.3);border-radius:12px;padding:12px;margin-bottom:8px">
+            <div style="font-family:'Roboto',sans-serif;font-size:14px;font-weight:800;color:#fff;margin-bottom:6px">${m?.firma||'—'}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              ${p.standKodu?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:6px 8px"><div style="font-size:9px;color:var(--muted)">STAND</div><div style="font-size:13px;color:#fff;font-weight:600">${p.standKodu}</div></div>`:''}
+              ${p.hall?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:6px 8px"><div style="font-size:9px;color:var(--muted)">HALL</div><div style="font-size:13px;color:#fff;font-weight:600">${p.hall}</div></div>`:''}
+              ${p.aydinlatma?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:6px 8px"><div style="font-size:9px;color:var(--muted)">AYDINLATMA</div><div style="font-size:12px;color:#fff">💡 ${p.aydinlatma}</div></div>`:''}
+              ${p.kablo?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:6px 8px"><div style="font-size:9px;color:var(--muted)">KABLO</div><div style="font-size:12px;color:#fff">🔌 ${p.kablo}</div></div>`:''}
+            </div>
+          </div>`;
+        }).join('')}
+      ` : `<div class="empty-state" style="padding:20px"><div class="empty-icon">🏗️</div><div class="empty-text">Henüz onaylı proje yok<br><span style="font-size:11px">Stand sekmesinden ekle</span></div></div>`}
+
+      <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeModal('fuarDetailModal')">Kapat</button>`;
+  }
+
+  else if (tab === 'siparisler') {
+    content = fuarSiparisler.length
+      ? fuarSiparisler.map(s=>sipCard(s)).join('') + `
+        <div style="margin-top:12px">
+          <button class="btn btn-primary btn-full" onclick="closeModal('fuarDetailModal');openSipModal('${fid}')">+ Yeni Sipariş Ekle</button>
+        </div>`
+      : `<div class="empty-state"><div class="empty-icon">🛒</div><div class="empty-text">Bu fuara ait sipariş yok</div></div>
+        <button class="btn btn-primary btn-full" onclick="closeModal('fuarDetailModal');openSipModal('${fid}')">+ Sipariş Ekle</button>`;
+  }
+
+  else if (tab === 'stand') {
+    const standCards = fuarStandlar.map(p => {
+      const m = STATE.musteriler.find(x=>x.id===p.musteriId);
+      const onayRenk = p.onaylandi ? 'var(--green)' : 'var(--yellow)';
+      const onayIcon = p.onaylandi ? '✅ Onaylı' : '⏳ Bekliyor';
+      const dosyalar = p.dosyalar || [];
+
+      return `<div style="
+        background:${p.onaylandi ? 'rgba(38,222,129,0.08)' : 'rgba(247,183,49,0.08)'};
+        border:1px solid ${onayRenk};
+        border-radius:14px;padding:14px;margin-bottom:12px
+      ">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-family:'Roboto',sans-serif;font-size:15px;font-weight:800;color:#fff">${m?.firma||'—'}</div>
+          <span style="font-size:11px;background:${p.onaylandi?'rgba(38,222,129,0.2)':'rgba(247,183,49,0.2)'};color:${onayRenk};padding:3px 10px;border-radius:20px;font-weight:600">${onayIcon}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+          ${p.standKodu?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Stand</div><div style="font-size:13px;color:#fff;font-weight:600">${p.standKodu}</div></div>`:''}
+          ${p.hall?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Hall</div><div style="font-size:13px;color:#fff;font-weight:600">${p.hall}</div></div>`:''}
+          ${p.aydinlatma?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Aydınlatma</div><div style="font-size:12px;color:#fff">💡 ${p.aydinlatma}</div></div>`:''}
+          ${p.boyaDurum?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Boya</div><div style="font-size:12px;color:#fff">🎨 ${p.boyaDurum}</div></div>`:''}
+          ${p.kablo?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Kablo</div><div style="font-size:12px;color:#fff">🔌 ${p.kablo}</div></div>`:''}
+          ${p.mimar?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Mimar/Marangoz</div><div style="font-size:12px;color:#fff">👷 ${p.mimar}</div></div>`:''}
+        </div>
+
+        ${dosyalar.length > 0 ? `
+          <div style="margin-bottom:10px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">📎 Dosyalar (${dosyalar.length})</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              ${dosyalar.map((d,i) => `
+                <div onclick="dosyaAc('${p.id}',${i})" style="
+                  background:rgba(255,255,255,0.08);border-radius:8px;padding:6px 10px;
+                  font-size:11px;color:#fff;cursor:pointer;display:flex;align-items:center;gap:4px
+                ">
+                  ${d.type==='link'?'🔗':d.type&&d.type.includes('pdf')?'📄':'🖼️'} ${d.name||'Dosya '+(i+1)}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <label style="
+            flex:1;padding:10px 12px;border-radius:10px;
+            background:rgba(108,99,255,0.15);border:1px solid var(--accent);
+            color:#fff;font-size:12px;cursor:pointer;text-align:center;
+            font-family:'Roboto',monospace;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:600
+          ">
+            📎 Dosya Ekle
+            <input type="file" accept="image/*,.pdf,.jpg,.jpeg,.png" style="display:none" onchange="dosyaEkle(event,'${p.id}','${fid}')">
+          </label>
+          ${!p.onaylandi?`<button class="btn btn-ghost btn-sm" style="flex:1" onclick="onaylaStand('${p.id}','${fid}')">✅ Onayla</button>`:'<button class="btn btn-ghost btn-sm" style="flex:1;color:var(--green)">✅ Onaylı</button>'}
+          <button class="btn btn-danger btn-sm" onclick="deleteStand('${p.id}','${fid}')">🗑️</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    content = `
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px">
+        ${fuarStandlar.length} proje · ${fuarStandlar.filter(p=>p.onaylandi).length} onaylı
+      </div>
+      ${fuarStandlar.length ? standCards : `<div class="empty-state"><div class="empty-icon">🏗️</div><div class="empty-text">Henüz stand projesi eklenmedi</div></div>`}
+      <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="openStandWizard('${fid}')">+ Yeni Stand Projesi</button>`;
+  }
+
+  else if (tab === 'notlar') {
+    content = `
+      ${fuarNotlar.length
+        ? fuarNotlar.map(n => {
+            const m = STATE.musteriler.find(x=>x.id===n.musteriId);
+            return `<div class="not-card" onclick="deleteNot('${n.id}')">
+              <div class="not-text">${n.text}</div>
+              <div class="not-meta">${m?`<span>👤 ${m.firma}</span>`:''}<span>🗑️ Tıkla sil</span></div>
+            </div>`;
+          }).join('')
+        : `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Not yok</div></div>`}
+      <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="openFuarNot('${fid}')">+ Not Ekle</button>`;
+  }
+
+  document.getElementById('fuarDetailContent').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div>
+        <div style="font-family:'Roboto',sans-serif;font-size:16px;font-weight:800;color:#fff;line-height:1.2">${f.name}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${fmtD(f.startDate)} – ${fmtD(f.endDate)} · <span style="color:${f.vColor}">${f.venue}</span></div>
+      </div>
+    </div>
+    ${tabBar}
+    ${content}
+  `;
+}
+
+window.switchFuarTab = function(tab, fid) {
+  STATE.fuarDetailTab = tab;
+  renderFuarDetailModal(fid);
+};
+
+window.openFuarNot = function(fid) {
+  closeModal('fuarDetailModal');
+  document.getElementById('notFuar').value = fid;
+  populateMusteriSelects();
+  populateFuarSelects();
+  document.getElementById('notText').value = '';
+  document.getElementById('notMusteri').value = '';
+  // Override save to return to fuar detail
+  window._notReturnFuarId = fid;
+  openM('notModal');
+};
+
+window.onaylaStand = async function(pid, fid) {
+  await updateDoc(doc(db,'standProjeler',pid), {onaylandi: true});
+  showToast('✅ Stand projesi onaylandı');
+};
+
+window.deleteStand = async function(pid, fid) {
+  if (!confirm('Stand projesi silinsin mi?')) return;
+  await deleteDoc(doc(db,'standProjeler',pid));
+  showToast('🗑️ Silindi');
+};
+
+window.duzenleStand = function(pid, fid) {
+  const p = STATE.standProjeler.find(x=>x.id===pid);
+  if (!p) return;
+  STATE.standWizard = {
+    fuarId: fid,
+    editId: pid,
+    step: 1,
+    data: { ...p }
+  };
+  renderStandWizard();
+  openM('standWizardModal');
+};
+
+window.deleteStandFromList = async function(pid) {
+  if (!confirm('Stand projesi silinsin mi?')) return;
+  await deleteDoc(doc(db,'standProjeler',pid));
+  showToast('🗑️ Silindi');
+};
+
+window.dosyaEkle = async function(event, pid, fid) {
+  const file = event.target.files[0];
+  if (!file) return;
+  showToast('⏳ Yükleniyor...');
+  try {
+    // Storage'a yükle
+    const path = `standProjeler/${pid}/${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, path);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+
+    // Firestore'a sadece URL kaydet
+    const proje = STATE.standProjeler.find(p=>p.id===pid);
+    const dosyalar = proje?.dosyalar || [];
+    dosyalar.push({ name: file.name, type: file.type, url });
+    await updateDoc(doc(db,'standProjeler',pid), { dosyalar });
+    showToast('✅ Dosya yüklendi!');
+  } catch(err) { showToast('❌ Hata: '+err.message); }
+  event.target.value = '';
+};
+
+window.dosyaAc = function(pid, idx) {
+  const proje = STATE.standProjeler.find(p=>p.id===pid);
+  const dosya = proje?.dosyalar?.[idx];
+  if (!dosya) return;
+
+  // Link tipi ise direkt aç
+  if (dosya.type === 'link') {
+    window.open(dosya.data, '_blank');
+    return;
+  }
+
+  // Storage URL ile aç
+  const url = dosya.url || dosya.data;
+  if (!url) return;
+
+  document.getElementById('dosyaModalTitle').textContent = dosya.name || 'Dosya';
+  const content = document.getElementById('dosyaModalContent');
+
+  if (dosya.type && dosya.type.includes('pdf')) {
+    content.innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:60px;margin-bottom:16px">📄</div>
+        <div style="color:#fff;font-size:16px;font-weight:600;margin-bottom:8px">${dosya.name||'PDF Dosyası'}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+          <a href="${url}" target="_blank" style="
+            display:block;background:var(--accent);color:#fff;
+            padding:14px 28px;border-radius:12px;font-size:15px;
+            font-family:'Roboto',monospace;text-decoration:none;font-weight:600;text-align:center
+          ">🔗 PDF'i Aç</a>
+          <a href="${url}" download="${dosya.name||'dosya.pdf'}" style="
+            display:block;background:var(--surface2);color:var(--text);
+            padding:14px 28px;border-radius:12px;font-size:15px;
+            font-family:'Roboto',monospace;text-decoration:none;text-align:center
+          ">⬇️ İndir</a>
+        </div>
+      </div>`;
+  } else {
+    content.innerHTML = `<img src="${url}" style="max-width:100%;max-height:85vh;object-fit:contain;border-radius:4px">`;
+  }
+
+  openM('dosyaModal');
+};
+
+// ── STAND WİZARD ──
+window.openStandWizard = function(fid) {
+  STATE.standWizard = { fuarId: fid, step: 1, data: {} };
+  renderStandWizard();
+  openM('standWizardModal');
+};
+
+function renderStandWizard() {
+  const wz = STATE.standWizard;
+  const fid = wz.fuarId;
+  const f = FUARLAR.find(x=>x.id===fid);
+
+  // Progress bar
+  const progress = Math.round((wz.step / 6) * 100);
+  const header = `
+    <div style="margin-bottom:28px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Roboto',sans-serif;font-size:22px;font-weight:800;color:#fff">🏗️ Stand Projesi</div>
+        <button onclick="closeModal('standWizardModal')" style="background:rgba(255,255,255,0.08);border:none;color:var(--muted);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer">×</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;letter-spacing:1px">ADIM ${wz.step} / 6</div>
+      <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${progress}%;background:var(--accent);border-radius:2px;transition:width .3s"></div>
+      </div>
+    </div>`;
+
+  let body = '';
+
+  if (wz.step === 1) {
+    const musteriOpts = STATE.musteriler.map(m =>
+      `<option value="${m.id}" ${wz.data.musteriId===m.id?'selected':''}>${m.firma}</option>`
+    ).join('');
+    body = `
+      <div style="font-family:'Roboto',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:20px">Müşteri Seç</div>
+      <select class="form-select" id="wz_musteri" style="font-size:17px;padding:16px;margin-bottom:auto">
+        <option value="">— Müşteri Seç —</option>
+        ${musteriOpts}
+      </select>`;
+  }
+
+  else if (wz.step === 2) {
+    body = `
+      <div style="font-family:'Roboto',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:20px">Stand Bilgisi</div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:13px">Stand Kodu</label>
+        <input type="text" class="form-input" id="wz_standKodu" value="${wz.data.standKodu||''}" placeholder="örn: A-124" style="font-size:18px;padding:16px">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:13px">Hall / Salon</label>
+        <input type="text" class="form-input" id="wz_hall" value="${wz.data.hall||''}" placeholder="örn: Hall 3" style="font-size:18px;padding:16px">
+      </div>`;
+  }
+
+  else if (wz.step === 3) {
+    const opts = [
+      { val:'6500K – Soğuk Beyaz', icon:'🔵', desc:'Ofis, teknoloji, sağlık' },
+      { val:'4000K – Nötr Beyaz',  icon:'⚪', desc:'Genel kullanım, mağaza' },
+      { val:'3000K – Sıcak Sarı',  icon:'🟡', desc:'Mobilya, dekor, restoran' },
+      { val:'Diğer',               icon:'⚙️', desc:'Manuel giriş' },
+    ];
+    body = `
+      <div style="font-family:'Roboto',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:20px">Aydınlatma Rengi</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:auto">
+        ${opts.map(o => `
+          <div onclick="wzSelect('aydinlatma','${o.val}')" style="
+            padding:18px 20px;border-radius:14px;cursor:pointer;
+            border:2px solid ${wz.data.aydinlatma===o.val?'var(--accent)':'var(--border)'};
+            background:${wz.data.aydinlatma===o.val?'rgba(108,99,255,0.2)':'var(--surface2)'};
+            display:flex;align-items:center;gap:14px;transition:all .15s
+          ">
+            <span style="font-size:28px">${o.icon}</span>
+            <div style="flex:1">
+              <div style="font-size:16px;font-weight:700;color:${wz.data.aydinlatma===o.val?'#fff':'var(--text)'}">${o.val}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">${o.desc}</div>
+            </div>
+            ${wz.data.aydinlatma===o.val?'<span style="font-size:20px;color:var(--accent)">✓</span>':''}
+          </div>
+        `).join('')}
+      </div>
+      ${wz.data.aydinlatma==='Diğer'?`<input type="text" class="form-input" id="wz_aydinlatmaOzel" placeholder="Açıkla..." style="margin-top:12px;font-size:16px" value="${wz.data.aydinlatmaOzel||''}">`:''}`;
+  }
+
+  else if (wz.step === 4) {
+    const opts = [
+      { val:'Boyalı',   icon:'🎨', desc:'Ahşap veya MDF boyalı yüzey' },
+      { val:'Suntalam', icon:'🪵', desc:'Ham suntalam, folyo kaplı' },
+    ];
+    body = `
+      <div style="font-family:'Roboto',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:20px">Boya Durumu</div>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:auto">
+        ${opts.map(o => `
+          <div onclick="wzSelect('boyaDurum','${o.val}')" style="
+            padding:24px;border-radius:16px;cursor:pointer;
+            border:2px solid ${wz.data.boyaDurum===o.val?'var(--accent)':'var(--border)'};
+            background:${wz.data.boyaDurum===o.val?'rgba(108,99,255,0.2)':'var(--surface2)'};
+            display:flex;align-items:center;gap:16px;transition:all .15s
+          ">
+            <span style="font-size:40px">${o.icon}</span>
+            <div style="flex:1">
+              <div style="font-family:'Roboto',sans-serif;font-size:18px;font-weight:800;color:${wz.data.boyaDurum===o.val?'#fff':'var(--text)'}">${o.val}</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:4px">${o.desc}</div>
+            </div>
+            ${wz.data.boyaDurum===o.val?'<span style="font-size:24px;color:var(--accent)">✓</span>':''}
+          </div>
+        `).join('')}
+      </div>`;
+  }
+
+  else if (wz.step === 5) {
+    const opts = ['Yok','1 Kablo','2 Kablo','3 Kablo','4 Kablo','Diğer'];
+    body = `
+      <div style="font-family:'Roboto',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:20px">Zemin Kablo Sayısı</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:auto">
+        ${opts.map(o => `
+          <div onclick="wzSelect('kablo','${o}')" style="
+            padding:20px 14px;border-radius:14px;cursor:pointer;text-align:center;
+            border:2px solid ${wz.data.kablo===o?'var(--accent)':'var(--border)'};
+            background:${wz.data.kablo===o?'rgba(108,99,255,0.2)':'var(--surface2)'};
+            transition:all .15s
+          ">
+            <div style="font-size:28px;margin-bottom:6px">${o==='Yok'?'🚫':o==='Diğer'?'➕':'🔌'}</div>
+            <div style="font-size:15px;font-weight:700;color:${wz.data.kablo===o?'#fff':'var(--text)'}">${o}</div>
+          </div>
+        `).join('')}
+      </div>
+      ${wz.data.kablo==='Diğer'?`<input type="text" class="form-input" id="wz_kabloOzel" placeholder="Açıkla..." style="margin-top:12px;font-size:16px" value="${wz.data.kabloOzel||''}">`:''}`;
+  }
+
+  else if (wz.step === 6) {
+    const m = STATE.musteriler.find(x=>x.id===wz.data.musteriId);
+    body = `
+      <div style="font-family:'Roboto',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:20px">Mimar / Marangoz</div>
+      <input type="text" class="form-input" id="wz_mimar" value="${wz.data.mimar||''}" placeholder="Ad Soyad" style="font-size:18px;padding:16px;margin-bottom:20px">
+      <div style="background:var(--surface2);border-radius:14px;padding:16px;margin-bottom:auto">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px">📋 Özet</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+          <div style="display:flex;gap:8px"><span>👤</span><span style="color:#fff;font-weight:600">${m?.firma||'—'}</span></div>
+          <div style="display:flex;gap:8px"><span>📍</span><span style="color:#fff">Stand: <b>${wz.data.standKodu||'—'}</b> · Hall: <b>${wz.data.hall||'—'}</b></span></div>
+          <div style="display:flex;gap:8px"><span>💡</span><span style="color:#fff">${wz.data.aydinlatma||'—'}</span></div>
+          <div style="display:flex;gap:8px"><span>🎨</span><span style="color:#fff">${wz.data.boyaDurum||'—'}</span></div>
+          <div style="display:flex;gap:8px"><span>🔌</span><span style="color:#fff">${wz.data.kablo||'—'}</span></div>
+        </div>
+      </div>`;
+  }
+
+  const footer = `
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <button class="btn btn-ghost" style="font-size:15px;padding:14px" onclick="${wz.step===1?`closeModal('standWizardModal')`:'wzBack()'}">
+        ${wz.step===1?'İptal':'← Geri'}
+      </button>
+      <button class="btn btn-primary" style="font-size:15px;padding:14px;font-weight:700" onclick="${wz.step===6?`wzSave('${fid}')`:`wzNext(${wz.step},'${fid}')`}">
+        ${wz.step===6?'💾 Kaydet':'Devam →'}
+      </button>
+    </div>`;
+
+  document.getElementById('standWizardContent').innerHTML = header + body + footer;
+}
+
+window.wzSelect = function(key, val) {
+  STATE.standWizard.data[key] = val;
+  renderStandWizard();
+};
+
+window.wzBack = function() {
+  STATE.standWizard.step--;
+  renderStandWizard();
+};
+
+window.wzNext = function(step, fid) {
+  const wz = STATE.standWizard;
+  if (step === 1) {
+    const v = document.getElementById('wz_musteri')?.value;
+    if (!v) { showToast('⚠️ Müşteri seçin'); return; }
+    wz.data.musteriId = v;
+  }
+  else if (step === 2) {
+    wz.data.standKodu = document.getElementById('wz_standKodu')?.value||'';
+    wz.data.hall = document.getElementById('wz_hall')?.value||'';
+  }
+  else if (step === 3) {
+    if (!wz.data.aydinlatma) { showToast('⚠️ Seçim yapın'); return; }
+    if (wz.data.aydinlatma === 'Diğer') {
+      wz.data.aydinlatmaOzel = document.getElementById('wz_aydinlatmaOzel')?.value||'';
+    }
+  }
+  else if (step === 4) {
+    if (!wz.data.boyaDurum) { showToast('⚠️ Seçim yapın'); return; }
+  }
+  else if (step === 5) {
+    if (!wz.data.kablo) { showToast('⚠️ Seçim yapın'); return; }
+    if (wz.data.kablo === 'Diğer') {
+      wz.data.kabloOzel = document.getElementById('wz_kabloOzel')?.value||'';
+    }
+  }
+  wz.step++;
+  renderStandWizard();
+};
+
+window.wzSave = async function(fid) {
+  const wz = STATE.standWizard;
+  wz.data.mimar = document.getElementById('wz_mimar')?.value||'';
+  const data = { fuarId: fid, ...wz.data };
+
+  try {
+    if (wz.editId) {
+      await updateDoc(doc(db,'standProjeler',wz.editId), data);
+      showToast('✅ Proje güncellendi');
+    } else {
+      data.onaylandi = false;
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db,'standProjeler'), data);
+      showToast('✅ Stand projesi kaydedildi');
+    }
+    closeModal('standWizardModal');
+    STATE.fuarDetailTab = 'stand';
+    STATE.activeFuarId = fid;
+    renderFuarDetailModal(fid);
+    openM('fuarDetailModal');
+  } catch(e) { showToast('❌ Hata: '+e.message); }
+};
+
+// ── SİPARİŞLER ──
+function sipCard(s) {
+  const musteri = STATE.musteriler.find(m=>m.id===s.musteriId);
+  const fuar = FUARLAR.find(f=>f.id===s.fuarId);
+  const stok = STATE.stoklar.find(x=>x.id===s.urunId);
+  const durumBadge = {
+    bekliyor: '<span class="badge badge-yellow">⏳ Bekliyor</span>',
+    onaylandi: '<span class="badge badge-green">✅ Onaylandı</span>',
+    teslim: '<span class="badge badge-blue">📦 Teslim</span>',
+    iptal: '<span class="badge badge-red">❌ İptal</span>',
+  }[s.durum] || '';
+
+  return `<div class="siparis-card" onclick="openSipDetail('${s.id}')">
+    <div class="siparis-header">
+      <div class="siparis-musteri">${musteri?.firma||s.musteriAd||'—'}</div>
+      <div class="siparis-tutar">₺${parseFloat(s.tutar||0).toLocaleString('tr-TR')}</div>
+    </div>
+    <div class="siparis-meta">
+      ${durumBadge}
+      <span>${stok?.ad||s.urunAd||'—'} · ${s.adet||1} adet</span>
+      ${fuar?`<span>📅 ${fuar.name}</span>`:''}
+    </div>
+  </div>`;
+}
+
+window.renderSiparisler = function() {
+  renderOnayliProjeler();
+};
+
+window.setProjeFuarFilter = function(v, btn) {
+  STATE.projeFuarFilter = v;
+  document.querySelectorAll('#sipStatusFilter .chip').forEach(c=>c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderOnayliProjeler();
+};
+
+window.renderOnayliProjeler = function() {
+  // Fuar filtre chipleri oluştur
+  const fuarlarWithProje = [...new Set(STATE.standProjeler.map(p=>p.fuarId))];
+  const filterEl = document.getElementById('sipStatusFilter');
+  if (filterEl) {
+    filterEl.innerHTML = `<div class="chip ${STATE.projeFuarFilter==='hepsi'?'active':''}" onclick="setProjeFuarFilter('hepsi',this)">Tüm Fuarlar</div>` +
+      fuarlarWithProje.map(fid => {
+        const f = FUARLAR.find(x=>x.id===fid);
+        return f ? `<div class="chip ${STATE.projeFuarFilter===fid?'active':''}" onclick="setProjeFuarFilter('${fid}',this)">${f.name.split('–')[0].trim()}</div>` : '';
+      }).join('');
+  }
+
+  // Sadece onaylıları göster
+  let list = STATE.standProjeler.filter(p => p.onaylandi);
+  if (STATE.projeFuarFilter && STATE.projeFuarFilter !== 'hepsi') {
+    list = list.filter(p => p.fuarId === STATE.projeFuarFilter);
+  }
+
+  document.getElementById('siparisSub').textContent = `${list.length} onaylı proje`;
+
+  if (!list.length) {
+    document.getElementById('siparisList').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <div class="empty-text">Henüz onaylı proje yok.<br>Fuara tıkla → Stand sekmesi → Onayla</div>
+      </div>`;
+    return;
+  }
+
+  // Fuar bazında grupla
+  const grouped = {};
+  list.forEach(p => {
+    if (!grouped[p.fuarId]) grouped[p.fuarId] = [];
+    grouped[p.fuarId].push(p);
+  });
+
+  document.getElementById('siparisList').innerHTML = Object.entries(grouped).map(([fid, projeler]) => {
+    const f = FUARLAR.find(x=>x.id===fid);
+    return `
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="font-family:'Roboto',sans-serif;font-size:13px;font-weight:700;color:#fff">${f?.name||'—'}</div>
+          <div style="font-size:10px;color:var(--muted)">${f?fmtD(f.startDate)+'→'+fmtD(f.endDate):''}</div>
+          <span style="font-size:10px;background:rgba(38,222,129,0.15);color:var(--green);padding:2px 8px;border-radius:10px">${projeler.length} proje</span>
+        </div>
+        ${projeler.map(p => {
+          const m = STATE.musteriler.find(x=>x.id===p.musteriId);
+          const dosyalar = p.dosyalar || [];
+          return `
+            <div style="background:rgba(38,222,129,0.06);border:1px solid rgba(38,222,129,0.3);border-radius:14px;padding:14px;margin-bottom:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <div style="font-family:'Roboto',sans-serif;font-size:15px;font-weight:800;color:#fff">${m?.firma||'—'}</div>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-ghost btn-sm" onclick="duzenleStand('${p.id}','${fid}')">✏️</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteStandFromList('${p.id}')">🗑️</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+                ${p.standKodu?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Stand</div><div style="font-size:13px;color:#fff;font-weight:600">${p.standKodu}</div></div>`:''}
+                ${p.hall?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Hall</div><div style="font-size:13px;color:#fff;font-weight:600">${p.hall}</div></div>`:''}
+                ${p.aydinlatma?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Aydınlatma</div><div style="font-size:12px;color:#fff">💡 ${p.aydinlatma}</div></div>`:''}
+                ${p.boyaDurum?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Boya</div><div style="font-size:12px;color:#fff">🎨 ${p.boyaDurum}</div></div>`:''}
+                ${p.kablo?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Kablo</div><div style="font-size:12px;color:#fff">🔌 ${p.kablo}</div></div>`:''}
+                ${p.mimar?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Mimar</div><div style="font-size:12px;color:#fff">👷 ${p.mimar}</div></div>`:''}
+              </div>
+              ${dosyalar.length>0?`
+                <div style="margin-bottom:8px">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:6px">📎 ${dosyalar.length} dosya</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    ${dosyalar.map((d,i)=>`
+                      <div onclick="dosyaAc('${p.id}',${i})" style="background:rgba(255,255,255,0.08);border-radius:8px;padding:5px 10px;font-size:11px;color:#fff;cursor:pointer">
+                        ${d.type==='link'?'🔗':d.type&&d.type.includes('pdf')?'📄':'🖼️'} ${d.name||'Dosya '+(i+1)}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `:''}
+              <label style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:10px;background:rgba(108,99,255,0.15);border:1px solid var(--accent);font-size:12px;color:#fff;cursor:pointer;font-family:'Roboto',monospace;font-weight:600">
+                📎 Dosya Ekle
+                <input type="file" accept="image/*,.pdf,.jpg,.jpeg,.png" style="display:none" onchange="dosyaEkle(event,'${p.id}','${fid}')">
+              </label>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }).join('');
+};
+
+window.openSipModal = function(prefuarId=null) {
+  document.getElementById('sipEditId').value = '';
+  document.getElementById('sipModalTitle').textContent = 'Yeni Sipariş';
+  ['sipMusteri','sipUrun','sipFuar','sipNot'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('sipAdet').value = '';
+  document.getElementById('sipTutar').value = '';
+  document.getElementById('sipDurum').value = 'bekliyor';
+  populateMusteriSelects();
+  populateUrunSelect();
+  populateFuarSelects();
+  if (prefuarId) document.getElementById('sipFuar').value = prefuarId;
+  openM('sipModal');
+};
+
+window.saveSiparis = async function() {
+  const musteriId = document.getElementById('sipMusteri').value;
+  const urunId = document.getElementById('sipUrun').value;
+  const adet = parseInt(document.getElementById('sipAdet').value)||1;
+  const tutar = parseFloat(document.getElementById('sipTutar').value)||0;
+  const fuarId = document.getElementById('sipFuar').value;
+  const durum = document.getElementById('sipDurum').value;
+  const not = document.getElementById('sipNot').value;
+  const editId = document.getElementById('sipEditId').value;
+
+  if (!musteriId) { showToast('⚠️ Müşteri seçin'); return; }
+  if (!urunId) { showToast('⚠️ Ürün seçin'); return; }
+
+  const data = { musteriId, urunId, adet, tutar, fuarId, durum, not, updatedAt: serverTimestamp() };
+
+  try {
+    if (editId) {
+      await updateDoc(doc(db,'siparisler',editId), data);
+      showToast('✅ Sipariş güncellendi');
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db,'siparisler'), data);
+      // Stok düş
+      if (urunId !== 'diger') {
+        const stok = STATE.stoklar.find(s=>s.id===urunId);
+        if (stok) {
+          const yeni = Math.max(0, (stok.mevcut||0) - adet);
+          await updateDoc(doc(db,'stoklar',urunId), { mevcut: yeni });
+        }
+      }
+      showToast('✅ Sipariş eklendi');
+    }
+    closeModal('sipModal');
+  } catch(e) { showToast('❌ Hata: '+e.message); }
+};
+
+window.openSipDetail = function(sid) {
+  const s = STATE.siparisler.find(x=>x.id===sid);
+  if (!s) return;
+  const m = STATE.musteriler.find(x=>x.id===s.musteriId);
+  const f = FUARLAR.find(x=>x.id===s.fuarId);
+  const st = STATE.stoklar.find(x=>x.id===s.urunId);
+
+  document.getElementById('sipDetailContent').innerHTML = `
+    <div class="modal-title">${m?.firma||'Sipariş Detayı'}</div>
+    <div class="detail-row"><span class="detail-label">Müşteri</span><span class="detail-val">${m?.firma||'—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Ürün</span><span class="detail-val">${st?.ad||'—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Adet</span><span class="detail-val">${s.adet}</span></div>
+    <div class="detail-row"><span class="detail-label">Tutar</span><span class="detail-val" style="color:var(--green)">₺${parseFloat(s.tutar||0).toLocaleString('tr-TR')}</span></div>
+    <div class="detail-row"><span class="detail-label">Fuar</span><span class="detail-val">${f?.name||'—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Durum</span><span class="detail-val">${s.durum||'—'}</span></div>
+    ${s.not?`<div class="detail-row"><span class="detail-label">Not</span><span class="detail-val">${s.not}</span></div>`:''}
+    <div class="divider"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="editSiparis('${sid}')">✏️ Düzenle</button>
+      <button class="btn btn-ghost btn-sm" onclick="updateSipDurum('${sid}')">🔄 Durum</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteSiparis('${sid}')">🗑️</button>
+    </div>
+  `;
+  openM('sipDetailModal');
+};
+
+window.editSiparis = function(sid) {
+  const s = STATE.siparisler.find(x=>x.id===sid);
+  if (!s) return;
+  closeModal('sipDetailModal');
+  populateMusteriSelects();
+  populateUrunSelect();
+  populateFuarSelects();
+  document.getElementById('sipEditId').value = sid;
+  document.getElementById('sipModalTitle').textContent = 'Siparişi Düzenle';
+  document.getElementById('sipMusteri').value = s.musteriId||'';
+  document.getElementById('sipUrun').value = s.urunId||'';
+  document.getElementById('sipAdet').value = s.adet||'';
+  document.getElementById('sipTutar').value = s.tutar||'';
+  document.getElementById('sipFuar').value = s.fuarId||'';
+  document.getElementById('sipDurum').value = s.durum||'bekliyor';
+  document.getElementById('sipNot').value = s.not||'';
+  openM('sipModal');
+};
+
+window.updateSipDurum = async function(sid) {
+  const s = STATE.siparisler.find(x=>x.id===sid);
+  if (!s) return;
+  const next = {bekliyor:'onaylandi',onaylandi:'teslim',teslim:'bekliyor'}[s.durum]||'bekliyor';
+  await updateDoc(doc(db,'siparisler',sid), {durum:next});
+  closeModal('sipDetailModal');
+  showToast('✅ Durum: '+next);
+};
+
+window.deleteSiparis = async function(sid) {
+  if (!confirm('Siparişi sil?')) return;
+  await deleteDoc(doc(db,'siparisler',sid));
+  closeModal('sipDetailModal');
+  showToast('🗑️ Silindi');
+};
+
+// ── STOK ──
+window.renderStok = function() {
+  document.getElementById('stokSub').textContent = STATE.stoklar.length+'/20 kalem';
+  if (!STATE.stoklar.length) {
+    document.getElementById('stokList').innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Henüz stok kalemi yok<br>+ ile ekleyin</div></div>`;
+    return;
+  }
+  document.getElementById('stokList').innerHTML = STATE.stoklar.map(s => {
+    const pct = s.toplam>0 ? Math.round((s.mevcut/s.toplam)*100) : 0;
+    const color = pct>50?'var(--green)':pct>20?'var(--yellow)':'var(--red)';
+    return `<div class="stok-item">
+      <div class="stok-header">
+        <div>
+          <div class="stok-name">${s.ad}</div>
+          ${s.kategori?`<div style="font-size:10px;color:var(--muted)">${s.kategori}</div>`:''}
+        </div>
+        <div class="stok-counts">
+          <strong style="color:${color}">${s.mevcut}</strong>
+          / ${s.toplam} adet
+          ${s.fiyat?`<div style="font-size:10px;margin-top:2px">₺${parseFloat(s.fiyat).toLocaleString('tr-TR')}</div>`:''}
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editStok('${s.id}')">✏️ Düzenle</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteStok('${s.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.openStokModal = function() {
+  if (STATE.stoklar.length >= 20) { showToast('⚠️ Maksimum 20 kalem'); return; }
+  document.getElementById('stokEditId').value = '';
+  document.getElementById('stokModalTitle').textContent = 'Yeni Stok Kalemi';
+  ['stokAd','stokTop','stokMev','stokFiyat','stokKat'].forEach(id => document.getElementById(id).value='');
+  openM('stokModal');
+};
+
+window.editStok = function(sid) {
+  const s = STATE.stoklar.find(x=>x.id===sid);
+  if (!s) return;
+  document.getElementById('stokEditId').value = sid;
+  document.getElementById('stokModalTitle').textContent = 'Stok Düzenle';
+  document.getElementById('stokAd').value = s.ad||'';
+  document.getElementById('stokTop').value = s.toplam||'';
+  document.getElementById('stokMev').value = s.mevcut||'';
+  document.getElementById('stokFiyat').value = s.fiyat||'';
+  document.getElementById('stokKat').value = s.kategori||'';
+  openM('stokModal');
+};
+
+window.saveStok = async function() {
+  const ad = document.getElementById('stokAd').value.trim();
+  if (!ad) { showToast('⚠️ Ürün adı girin'); return; }
+  const toplam = parseInt(document.getElementById('stokTop').value)||0;
+  const mevcut = parseInt(document.getElementById('stokMev').value)||0;
+  const fiyat = parseFloat(document.getElementById('stokFiyat').value)||0;
+  const kategori = document.getElementById('stokKat').value.trim();
+  const editId = document.getElementById('stokEditId').value;
+
+  const data = { ad, toplam, mevcut, fiyat, kategori };
+  try {
+    if (editId) {
+      await updateDoc(doc(db,'stoklar',editId), data);
+      showToast('✅ Güncellendi');
+    } else {
+      await addDoc(collection(db,'stoklar'), data);
+      showToast('✅ Stok eklendi');
+    }
+    closeModal('stokModal');
+  } catch(e) { showToast('❌ Hata'); }
+};
+
+window.deleteStok = async function(sid) {
+  if (!confirm('Stok kalemi silinsin mi?')) return;
+  await deleteDoc(doc(db,'stoklar',sid));
+  showToast('🗑️ Silindi');
+};
+
+// ── MÜŞTERİLER ──
+window.renderMusteriler = function() {
+  let list = [...STATE.musteriler];
+  const q = document.getElementById('musteriSearch')?.value?.toLowerCase()||'';
+  if (q) list = list.filter(m => m.firma?.toLowerCase().includes(q) || m.yetkili?.toLowerCase().includes(q));
+
+  document.getElementById('musteriSub').textContent = list.length+' müşteri';
+  if (!list.length) {
+    document.getElementById('musteriList').innerHTML = `<div class="empty-state"><div class="empty-icon">📇</div><div class="empty-text">Müşteri bulunamadı</div></div>`;
+    return;
+  }
+  document.getElementById('musteriList').innerHTML = list.map(m => {
+    const sipCount = STATE.siparisler.filter(s=>s.musteriId===m.id).length;
+    const initials = (m.firma||'?').substring(0,2).toUpperCase();
+    return `<div class="musteri-card" onclick="openMusteriDetail('${m.id}')">
+      <div class="musteri-avatar">${initials}</div>
+      <div class="musteri-info">
+        <div class="musteri-name">${m.firma}</div>
+        <div class="musteri-meta">
+          ${m.yetkili?m.yetkili+' · ':''}${sipCount} sipariş
+          ${m.sehir?' · '+m.sehir:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.openMusteriModal = function() {
+  document.getElementById('musteriEditId').value = '';
+  document.getElementById('musteriModalTitle').textContent = 'Yeni Müşteri';
+  ['mFirma','mYetkili','mTel','mEmail','mSehir','mNot'].forEach(id => document.getElementById(id).value='');
+  openM('musteriModal');
+};
+
+window.openMusteriDetail = function(mid) {
+  const m = STATE.musteriler.find(x=>x.id===mid);
+  if (!m) return;
+  const siparisler = STATE.siparisler.filter(s=>s.musteriId===mid);
+  const totalTutar = siparisler.reduce((s,x)=>s+(parseFloat(x.tutar)||0),0);
+
+  document.getElementById('musteriDetailContent').innerHTML = `
+    <div class="modal-title">${m.firma}</div>
+    ${m.yetkili?`<div class="detail-row"><span class="detail-label">Yetkili</span><span class="detail-val">${m.yetkili}</span></div>`:''}
+    ${m.tel?`<div class="detail-row"><span class="detail-label">Telefon</span><span class="detail-val"><a href="tel:${m.tel}" style="color:var(--blue)">${m.tel}</a></span></div>`:''}
+    ${m.email?`<div class="detail-row"><span class="detail-label">E-posta</span><span class="detail-val">${m.email}</span></div>`:''}
+    ${m.sehir?`<div class="detail-row"><span class="detail-label">Şehir</span><span class="detail-val">${m.sehir}</span></div>`:''}
+    <div class="detail-row"><span class="detail-label">Siparişler</span><span class="detail-val">${siparisler.length} adet</span></div>
+    <div class="detail-row"><span class="detail-label">Toplam</span><span class="detail-val" style="color:var(--green)">₺${totalTutar.toLocaleString('tr-TR')}</span></div>
+    ${m.not?`<div class="detail-row"><span class="detail-label">Not</span><span class="detail-val">${m.not}</span></div>`:''}
+    <div class="divider"></div>
+    ${siparisler.length>0?`<div style="font-size:10px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:2px">Siparişler</div>${siparisler.map(s=>sipCard(s)).join('')}<div class="divider"></div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-ghost" onclick="editMusteri('${mid}')">✏️ Düzenle</button>
+      <button class="btn btn-danger" onclick="deleteMusteri('${mid}')">🗑️ Sil</button>
+    </div>
+  `;
+  openM('musteriDetailModal');
+};
+
+window.saveMusteri = async function() {
+  const firma = document.getElementById('mFirma').value.trim();
+  if (!firma) { showToast('⚠️ Firma adı girin'); return; }
+  const editId = document.getElementById('musteriEditId').value;
+  const data = {
+    firma,
+    yetkili: document.getElementById('mYetkili').value,
+    tel: document.getElementById('mTel').value,
+    email: document.getElementById('mEmail').value,
+    sehir: document.getElementById('mSehir').value,
+    not: document.getElementById('mNot').value,
+  };
+  try {
+    if (editId) {
+      await updateDoc(doc(db,'musteriler',editId), data);
+      showToast('✅ Güncellendi');
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db,'musteriler'), data);
+      showToast('✅ Müşteri eklendi');
+    }
+    closeModal('musteriModal');
+  } catch(e) { showToast('❌ Hata'); }
+};
+
+window.editMusteri = function(mid) {
+  const m = STATE.musteriler.find(x=>x.id===mid);
+  if (!m) return;
+  closeModal('musteriDetailModal');
+  document.getElementById('musteriEditId').value = mid;
+  document.getElementById('musteriModalTitle').textContent = 'Müşteri Düzenle';
+  document.getElementById('mFirma').value = m.firma||'';
+  document.getElementById('mYetkili').value = m.yetkili||'';
+  document.getElementById('mTel').value = m.tel||'';
+  document.getElementById('mEmail').value = m.email||'';
+  document.getElementById('mSehir').value = m.sehir||'';
+  document.getElementById('mNot').value = m.not||'';
+  openM('musteriModal');
+};
+
+window.deleteMusteri = async function(mid) {
+  if (!confirm('Müşteri silinsin mi?')) return;
+  await deleteDoc(doc(db,'musteriler',mid));
+  closeModal('musteriDetailModal');
+  showToast('🗑️ Silindi');
+};
+
+// ── NOTLAR ──
+window.renderNotlar = function() {
+  document.getElementById('notSub').textContent = STATE.notlar.length+' not';
+  if (!STATE.notlar.length) {
+    document.getElementById('notList').innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Not bulunamadı</div></div>`;
+    return;
+  }
+  document.getElementById('notList').innerHTML = STATE.notlar.map(n => {
+    const f = FUARLAR.find(x=>x.id===n.fuarId);
+    const m = STATE.musteriler.find(x=>x.id===n.musteriId);
+    return `<div class="not-card" onclick="deleteNot('${n.id}')">
+      <div class="not-text">${n.text}</div>
+      <div class="not-meta">
+        ${f?`<span>📅 ${f.name}</span>`:''}
+        ${m?`<span>👤 ${m.firma}</span>`:''}
+        <span>🗑️ Silmek için tıkla</span>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.openNotModal = function() {
+  document.getElementById('notEditId').value = '';
+  document.getElementById('notText').value = '';
+  document.getElementById('notFuar').value = '';
+  document.getElementById('notMusteri').value = '';
+  populateFuarSelects();
+  populateMusteriSelects();
+  openM('notModal');
+};
+
+window.saveNot = async function() {
+  const text = document.getElementById('notText').value.trim();
+  if (!text) { showToast('⚠️ Not girin'); return; }
+  try {
+    await addDoc(collection(db,'notlar'), {
+      text,
+      fuarId: document.getElementById('notFuar').value,
+      musteriId: document.getElementById('notMusteri').value,
+      createdAt: serverTimestamp(),
+    });
+    showToast('✅ Not kaydedildi');
+    closeModal('notModal');
+    // Fuar detayından geldiyse geri dön
+    if (window._notReturnFuarId) {
+      STATE.fuarDetailTab = 'notlar';
+      renderFuarDetailModal(window._notReturnFuarId);
+      openM('fuarDetailModal');
+      window._notReturnFuarId = null;
+    }
+  } catch(e) { showToast('❌ Hata'); }
+};
+
+window.deleteNot = async function(nid) {
+  if (!confirm('Not silinsin mi?')) return;
+  await deleteDoc(doc(db,'notlar',nid));
+  showToast('🗑️ Silindi');
+};
+
+// ── BİLDİRİMLER ──
+window.showNotifInfo = async function() {
+  if ('Notification' in window) {
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      showToast('🔔 Bildirimler açık!');
+      checkUpcomingFuarAlarms();
+    } else {
+      showToast('❌ Bildirim izni reddedildi');
+    }
+  }
+};
+
+function checkUpcomingFuarAlarms() {
+  FUARLAR.forEach(f => {
+    const diff = Math.ceil((f.startDate - TODAY) / 86400000);
+    if (diff === 1) {
+      new Notification(`📅 Yarın: ${f.name}`, {
+        body: `${f.venue} · ${fmtD(f.startDate)}`,
+        icon: '/icon-192.png'
+      });
+    } else if (diff === 3) {
+      new Notification(`📅 3 gün sonra: ${f.name}`, {
+        body: `${f.venue} · ${fmtD(f.startDate)}`,
+        icon: '/icon-192.png'
+      });
+    }
+  });
+}
+
+// ── SYNC STATUS ──
+window.syncStatus = function() {
+  showToast('☁️ Firebase bağlı · Veriler senkronize');
+};
+
+// ── INIT ──
+document.getElementById('todayDate').textContent =
+  TODAY.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[TODAY.getMonth()]+' '+TODAY.getFullYear();
+
+renderFuarlar();
+updateDashboard();
+updateFab();
+
+// Notlar tab - sol nav yok ama header'dan erişilebilir
+document.querySelector('.app-logo').addEventListener('dblclick', () => {
+  showPage('notlar');
+});
+
+// ESC
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+  }
+});
+
+</script>
+</body>
+</html>
