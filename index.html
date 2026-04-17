@@ -673,7 +673,7 @@ body {
   <div class="section-sub" id="todayDate">—</div>
 
   <div class="stat-grid" id="dashStats">
-    <div class="stat-card">
+    <div class="stat-card" style="cursor:pointer" onclick="showPage('siparisler',document.querySelector('.tab-btn:nth-child(3)'))">
       <div class="stat-val" id="dSiparis">0</div>
       <div class="stat-lbl">Onaylı Proje</div>
     </div>
@@ -686,8 +686,8 @@ body {
       <div class="stat-lbl">Aktif Fuar</div>
     </div>
     <div class="stat-card">
-      <div class="stat-val" id="dMusteri">0</div>
-      <div class="stat-lbl">Müşteri</div>
+      <div class="stat-val" id="dMusteri" style="font-size:13px;line-height:1.3"></div>
+      <div class="stat-lbl">Onaylı Müşteriler</div>
     </div>
   </div>
 
@@ -1297,6 +1297,20 @@ function updateDashboard() {
   }
   document.getElementById('dFuar').textContent = activeFuarlar.length;
   document.getElementById('dMusteri').textContent = STATE.musteriler.length;
+
+  // Onaylı projelerin müşterilerini göster
+  const onayliMusteriIds = [...new Set(STATE.standProjeler.filter(p=>p.onaylandi).map(p=>p.musteriId))];
+  const onayliMusteriler = onayliMusteriIds.map(id => STATE.musteriler.find(m=>m.id===id)).filter(Boolean);
+  const musteriEl = document.getElementById('dMusteri');
+  if (onayliMusteriler.length) {
+    musteriEl.innerHTML = onayliMusteriler.map(m =>
+      `<div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:2px">${m.firma}</div>`
+    ).join('');
+    musteriEl.style.fontSize = '12px';
+  } else {
+    musteriEl.textContent = '—';
+    musteriEl.style.fontSize = '20px';
+  }
 
   const df = document.getElementById('dashFuarlar');
   const showFuarlar = [...activeFuarlar, ...upcomingFuarlar].slice(0,4);
