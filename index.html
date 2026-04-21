@@ -1555,7 +1555,7 @@ function renderFuarDetailModal(fid) {
           ${p.aydinlatma?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Aydınlatma</div><div style="font-size:12px;color:#fff">💡 ${p.aydinlatma}</div></div>`:''}
           ${p.boyaDurum?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Boya</div><div style="font-size:12px;color:#fff">🎨 ${p.boyaDurum}</div></div>`:''}
           ${p.kablo?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Zemin Kablosu</div><div style="font-size:12px;color:#fff">🔌 ${p.kablo}</div></div>`:''}
-          ${p.kurulumEkibi?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Kurulum Ekibi</div><div style="font-size:12px;color:#fff">🔧 ${p.kurulumEkibi}</div></div>`:''}
+          ${p.kurulumEkibi||p.mimar?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Kurulum Ekibi</div><div style="font-size:12px;color:#fff">🔧 ${p.kurulumEkibi||p.mimar}</div></div>`:''}
         </div>
 
         ${dosyalar.length > 0 ? `
@@ -2077,7 +2077,7 @@ window.renderOnayliProjeler = function() {
                 ${p.aydinlatma?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Aydınlatma</div><div style="font-size:12px;color:#fff">💡 ${p.aydinlatma}</div></div>`:''}
                 ${p.boyaDurum?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Boya</div><div style="font-size:12px;color:#fff">🎨 ${p.boyaDurum}</div></div>`:''}
                 ${p.kablo?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Zemin Kablosu</div><div style="font-size:12px;color:#fff">🔌 ${p.kablo}</div></div>`:''}
-                ${p.kurulumEkibi?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Mimar</div><div style="font-size:12px;color:#fff">🔧 ${p.kurulumEkibi}</div></div>`:''}
+                ${p.kurulumEkibi||p.mimar?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Kurulum Ekibi</div><div style="font-size:12px;color:#fff">🔧 ${p.kurulumEkibi||p.mimar}</div></div>`:''}
               </div>
               ${dosyalar.length>0?`
                 <div style="margin-bottom:8px">
