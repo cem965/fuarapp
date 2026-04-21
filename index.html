@@ -648,13 +648,36 @@ body {
 .detail-label { color: var(--muted); }
 .detail-val { color: var(--text); font-weight: 500; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+/* Şifre Ekranı */
+#loginScreen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px;
+}
+#loginScreen.hidden { display: none; }
 </style>
 </head>
 <body>
+
+<!-- ŞİFRE EKRANI -->
+<div id="loginScreen">
+  <div style="text-align:center;margin-bottom:40px">
+    <div style="font-family:'Roboto',sans-serif;font-size:26px;font-weight:900;color:#fff;margin-bottom:6px">
+      BEYOĞLU <span style="color:var(--accent)">ELEKTRİK</span>
+    </div>
+    <div style="font-size:13px;color:var(--muted)">Fuar Takip Sistemi</div>
+  </div>
+  <div style="width:100%;max-width:320px">
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Şifre</div>
+    <input type="password" id="loginInput" class="form-input" placeholder="••••••••" style="font-size:18px;padding:16px;letter-spacing:4px;margin-bottom:16px"
+      onkeydown="if(event.key==='Enter') checkLogin()">
+    <button class="btn btn-primary btn-full" style="font-size:16px;padding:16px" onclick="checkLogin()">Giriş Yap</button>
+    <div id="loginError" style="color:var(--red);font-size:13px;text-align:center;margin-top:12px;display:none">❌ Hatalı şifre</div>
+  </div>
+</div>
 
 <!-- HEADER -->
 <header class="app-header">
@@ -1648,6 +1671,21 @@ window.deleteStandFromList = async function(pid) {
   showToast('🗑️ Silindi');
 };
 
+window.kapakResmiEkle = async function(event, pid) {
+  const file = event.target.files[0];
+  if (!file) return;
+  showToast('⏳ Resim yükleniyor...');
+  try {
+    const path = `kapakResimleri/${pid}_${Date.now()}`;
+    const storageRef = ref(storage, path);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    await updateDoc(doc(db,'standProjeler',pid), { kapaкResmi: url });
+    showToast('✅ Arka plan eklendi!');
+  } catch(err) { showToast('❌ Hata: '+err.message); }
+  event.target.value = '';
+};
+
 window.dosyaEkle = async function(event, pid, fid) {
   const file = event.target.files[0];
   if (!file) return;
@@ -2017,36 +2055,43 @@ window.renderOnayliProjeler = function() {
         ${projeler.map(p => {
           const m = STATE.musteriler.find(x=>x.id===p.musteriId);
           const dosyalar = p.dosyalar || [];
+          const bgImg = p.kapaкResmi || '';
+          const cardStyle = bgImg
+            ? `background:linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.75)),url('${bgImg}') center/cover no-repeat;border:1px solid rgba(255,255,255,0.2);`
+            : `background:rgba(38,222,129,0.06);border:1px solid rgba(38,222,129,0.3);`;
           return `
-            <div style="background:rgba(38,222,129,0.06);border:1px solid rgba(38,222,129,0.3);border-radius:14px;padding:14px;margin-bottom:10px">
+            <div style="${cardStyle}border-radius:14px;padding:14px;margin-bottom:10px;position:relative">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                 <div style="font-family:'Roboto',sans-serif;font-size:15px;font-weight:800;color:#fff">${m?.firma||'—'}</div>
                 <div style="display:flex;gap:6px">
+                  <label title="Arka plan resmi ekle" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">
+                    🖼️<input type="file" accept="image/*" style="display:none" onchange="kapakResmiEkle(event,'${p.id}')">
+                  </label>
                   <button class="btn btn-ghost btn-sm" onclick="duzenleStand('${p.id}','${fid}')">✏️</button>
                   <button class="btn btn-danger btn-sm" onclick="deleteStandFromList('${p.id}')">🗑️</button>
                 </div>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
-                ${p.standKodu?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Stand</div><div style="font-size:13px;color:#fff;font-weight:600">${p.standKodu}</div></div>`:''}
-                ${p.hall?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Hall</div><div style="font-size:13px;color:#fff;font-weight:600">${p.hall}</div></div>`:''}
-                ${p.aydinlatma?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Aydınlatma</div><div style="font-size:12px;color:#fff">💡 ${p.aydinlatma}</div></div>`:''}
-                ${p.boyaDurum?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Boya</div><div style="font-size:12px;color:#fff">🎨 ${p.boyaDurum}</div></div>`:''}
-                ${p.kablo?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Kablo</div><div style="font-size:12px;color:#fff">🔌 ${p.kablo}</div></div>`:''}
-                ${p.mimar?`<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Mimar</div><div style="font-size:12px;color:#fff">👷 ${p.mimar}</div></div>`:''}
+                ${p.standKodu?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Stand</div><div style="font-size:13px;color:#fff;font-weight:600">${p.standKodu}</div></div>`:''}
+                ${p.hall?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Hall</div><div style="font-size:13px;color:#fff;font-weight:600">${p.hall}</div></div>`:''}
+                ${p.aydinlatma?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Aydınlatma</div><div style="font-size:12px;color:#fff">💡 ${p.aydinlatma}</div></div>`:''}
+                ${p.boyaDurum?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Boya</div><div style="font-size:12px;color:#fff">🎨 ${p.boyaDurum}</div></div>`:''}
+                ${p.kablo?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Kablo</div><div style="font-size:12px;color:#fff">🔌 ${p.kablo}</div></div>`:''}
+                ${p.mimar?`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:8px"><div style="font-size:9px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:2px">Mimar</div><div style="font-size:12px;color:#fff">👷 ${p.mimar}</div></div>`:''}
               </div>
               ${dosyalar.length>0?`
                 <div style="margin-bottom:8px">
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:6px">📎 ${dosyalar.length} dosya</div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:6px">📎 ${dosyalar.length} dosya</div>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     ${dosyalar.map((d,i)=>`
-                      <div onclick="dosyaAc('${p.id}',${i})" style="background:rgba(255,255,255,0.08);border-radius:8px;padding:5px 10px;font-size:11px;color:#fff;cursor:pointer">
+                      <div onclick="dosyaAc('${p.id}',${i})" style="background:rgba(255,255,255,0.15);border-radius:8px;padding:5px 10px;font-size:11px;color:#fff;cursor:pointer">
                         ${d.type==='link'?'🔗':d.type&&d.type.includes('pdf')?'📄':'🖼️'} ${d.name||'Dosya '+(i+1)}
                       </div>
                     `).join('')}
                   </div>
                 </div>
               `:''}
-              <label style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:10px;background:rgba(108,99,255,0.15);border:1px solid var(--accent);font-size:12px;color:#fff;cursor:pointer;font-family:'Roboto',monospace;font-weight:600">
+              <label style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:10px;background:rgba(108,99,255,0.3);border:1px solid var(--accent);font-size:12px;color:#fff;cursor:pointer;font-weight:600">
                 📎 Dosya Ekle
                 <input type="file" accept="image/*,.pdf,.jpg,.jpeg,.png" style="display:none" onchange="dosyaEkle(event,'${p.id}','${fid}')">
               </label>
@@ -2450,6 +2495,25 @@ window.syncStatus = function() {
   showToast('☁️ Firebase bağlı · Veriler senkronize');
 };
 
+// ── ŞİFRE ──
+const APP_SIFRE = 'beyoglu2026';
+
+window.checkLogin = function() {
+  const val = document.getElementById('loginInput').value;
+  if (val === APP_SIFRE) {
+    localStorage.setItem('fuarapp_auth', '1');
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('loginError').style.display = 'none';
+    initApp();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginInput').value = '';
+    document.getElementById('loginInput').focus();
+  }
+};
+
+function initApp() {
+
 // ── INIT ──
 document.getElementById('todayDate').textContent =
   TODAY.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[TODAY.getMonth()]+' '+TODAY.getFullYear();
@@ -2458,17 +2522,25 @@ renderFuarlar();
 updateDashboard();
 updateFab();
 
-// Notlar tab - sol nav yok ama header'dan erişilebilir
 document.querySelector('.app-logo').addEventListener('dblclick', () => {
   showPage('notlar');
 });
 
-// ESC
 document.addEventListener('keydown', e => {
   if (e.key==='Escape') {
     document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
   }
 });
+
+} // initApp sonu
+
+// Şifre kontrolü — daha önce giriş yaptıysa direkt aç
+if (localStorage.getItem('fuarapp_auth') === '1') {
+  document.getElementById('loginScreen').classList.add('hidden');
+  initApp();
+} else {
+  setTimeout(() => document.getElementById('loginInput')?.focus(), 300);
+}
 
 </script>
 </body>
