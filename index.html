@@ -1563,11 +1563,11 @@ function renderFuarDetailModal(fid) {
             <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">📎 Dosyalar (${dosyalar.length})</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px">
               ${dosyalar.map((d,i) => `
-                <div onclick="dosyaAc('${p.id}',${i})" style="
-                  background:rgba(255,255,255,0.08);border-radius:8px;padding:6px 10px;
-                  font-size:11px;color:#fff;cursor:pointer;display:flex;align-items:center;gap:4px
-                ">
-                  ${d.type==='link'?'🔗':d.type&&d.type.includes('pdf')?'📄':'🖼️'} ${d.name||'Dosya '+(i+1)}
+                <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:6px 10px;font-size:11px;color:#fff;display:flex;align-items:center;gap:6px">
+                  <span onclick="dosyaAc('${p.id}',${i})" style="cursor:pointer">
+                    ${d.type==='link'?'🔗':d.type&&d.type.includes('pdf')?'📄':'🖼️'} ${d.name||'Dosya '+(i+1)}
+                  </span>
+                  <span onclick="dosyaSil('${p.id}',${i})" style="cursor:pointer;color:rgba(255,100,100,0.8);font-size:14px" title="Sil">×</span>
                 </div>
               `).join('')}
             </div>
@@ -1669,6 +1669,17 @@ window.deleteStandFromList = async function(pid) {
   if (!confirm('Stand projesi silinsin mi?')) return;
   await deleteDoc(doc(db,'standProjeler',pid));
   showToast('🗑️ Silindi');
+};
+
+window.dosyaSil = async function(pid, idx) {
+  if (!confirm('Dosya silinsin mi?')) return;
+  try {
+    const proje = STATE.standProjeler.find(p=>p.id===pid);
+    const dosyalar = [...(proje?.dosyalar||[])];
+    dosyalar.splice(idx, 1);
+    await updateDoc(doc(db,'standProjeler',pid), { dosyalar });
+    showToast('🗑️ Dosya silindi');
+  } catch(err) { showToast('❌ Hata: '+err.message); }
 };
 
 window.kapakResmiEkle = async function(event, pid) {
@@ -2084,8 +2095,11 @@ window.renderOnayliProjeler = function() {
                   <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:6px">📎 ${dosyalar.length} dosya</div>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     ${dosyalar.map((d,i)=>`
-                      <div onclick="dosyaAc('${p.id}',${i})" style="background:rgba(255,255,255,0.15);border-radius:8px;padding:5px 10px;font-size:11px;color:#fff;cursor:pointer">
-                        ${d.type==='link'?'🔗':d.type&&d.type.includes('pdf')?'📄':'🖼️'} ${d.name||'Dosya '+(i+1)}
+                      <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:5px 8px;font-size:11px;color:#fff;display:flex;align-items:center;gap:6px">
+                        <span onclick="dosyaAc('${p.id}',${i})" style="cursor:pointer">
+                          ${d.type==='link'?'🔗':d.type&&d.type.includes('pdf')?'📄':'🖼️'} ${d.name||'Dosya '+(i+1)}
+                        </span>
+                        <span onclick="dosyaSil('${p.id}',${i})" style="cursor:pointer;color:rgba(255,100,100,0.8);font-size:13px;padding:0 2px" title="Sil">×</span>
                       </div>
                     `).join('')}
                   </div>
