@@ -1458,8 +1458,10 @@ window.renderFuarlar = function() {
     `<div class="chip ${STATE.fuarMonthFilter===m?'active':''}" onclick="setFuarMonth('${m}',this)">${m}</div>`
   ).join('');
 
-  // Sabit fuarlar + manuel fuarlar birleştir
-  let list = [...FUARLAR, ...(STATE.manuelFuarlar||[])].sort((a,b)=>a.startDate-b.startDate);
+  // Sabit fuarlar + manuel fuarlar birleştir, geçmişleri gösterme
+  let list = [...FUARLAR, ...(STATE.manuelFuarlar||[])]
+    .filter(f => fuarStatus(f) !== 'past')
+    .sort((a,b)=>a.startDate-b.startDate);
   if (STATE.fuarMonthFilter !== 'Tümü') list = list.filter(f => f.monthName === STATE.fuarMonthFilter);
 
   document.getElementById('fuarList').innerHTML = list.map(f => {
