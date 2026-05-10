@@ -1363,8 +1363,15 @@ function updateDashboard() {
   document.getElementById('dFuar').textContent = activeFuarlar.length;
   document.getElementById('dMusteri').textContent = STATE.musteriler.length;
 
-  // Onaylı projelerin müşterilerini göster
-  const onayliMusteriIds = [...new Set(STATE.standProjeler.filter(p=>p.onaylandi).map(p=>p.musteriId))];
+  // Sadece aktif/yaklaşan fuarlardaki onaylı projelerin müşterilerini göster
+  const aktifFuarIds = new Set([...FUARLAR, ...(STATE.manuelFuarlar||[])]
+    .filter(f => fuarStatus(f) !== 'past')
+    .map(f => f.id));
+  const onayliMusteriIds = [...new Set(
+    STATE.standProjeler
+      .filter(p => p.onaylandi && aktifFuarIds.has(p.fuarId))
+      .map(p => p.musteriId)
+  )];
   const onayliMusteriler = onayliMusteriIds.map(id => STATE.musteriler.find(m=>m.id===id)).filter(Boolean);
   const musteriEl = document.getElementById('dMusteri');
   if (onayliMusteriler.length) {
@@ -1404,8 +1411,8 @@ function updateDashboard() {
 
   const ds = document.getElementById('dashSiparisler');
 
-  // Tüm gelecek fuarları bul (limit yok)
-  const yakinFuarlar = FUARLAR
+  // Tüm gelecek fuarları bul (sabit + manuel)
+  const yakinFuarlar = [...FUARLAR, ...(STATE.manuelFuarlar||[])]
     .filter(f => f.endDate >= TODAY)
     .sort((a,b) => a.startDate - b.startDate);
 
