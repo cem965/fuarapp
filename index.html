@@ -2084,19 +2084,26 @@ window.setProjeFuarFilter = function(v, btn) {
 };
 
 window.renderOnayliProjeler = function() {
-  // Fuar filtre chipleri oluştur
-  const fuarlarWithProje = [...new Set(STATE.standProjeler.map(p=>p.fuarId))];
+  // Aktif/yaklaşan fuar idleri
+  const aktifFuarIds = new Set([...FUARLAR, ...(STATE.manuelFuarlar||[])]
+    .filter(f => fuarStatus(f) !== 'past').map(f => f.id));
+
+  // Fuar filtre chipleri — sadece aktif/yaklaşan fuarlar
+  const fuarlarWithProje = [...new Set(STATE.standProjeler
+    .filter(p => p.onaylandi && aktifFuarIds.has(p.fuarId))
+    .map(p => p.fuarId))];
+
   const filterEl = document.getElementById('sipStatusFilter');
   if (filterEl) {
     filterEl.innerHTML = `<div class="chip ${STATE.projeFuarFilter==='hepsi'?'active':''}" onclick="setProjeFuarFilter('hepsi',this)">Tüm Fuarlar</div>` +
       fuarlarWithProje.map(fid => {
-        const f = FUARLAR.find(x=>x.id===fid);
+        const f = [...FUARLAR, ...(STATE.manuelFuarlar||[])].find(x=>x.id===fid);
         return f ? `<div class="chip ${STATE.projeFuarFilter===fid?'active':''}" onclick="setProjeFuarFilter('${fid}',this)">${f.name.split('–')[0].trim()}</div>` : '';
       }).join('');
   }
 
-  // Sadece onaylıları göster
-  let list = STATE.standProjeler.filter(p => p.onaylandi);
+  // Sadece aktif/yaklaşan fuarlardaki onaylıları göster
+  let list = STATE.standProjeler.filter(p => p.onaylandi && aktifFuarIds.has(p.fuarId));
   if (STATE.projeFuarFilter && STATE.projeFuarFilter !== 'hepsi') {
     list = list.filter(p => p.fuarId === STATE.projeFuarFilter);
   }
