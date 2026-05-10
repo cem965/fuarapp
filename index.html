@@ -1302,7 +1302,10 @@ function updateDashboard() {
   document.getElementById('todayDate').textContent =
     now.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[now.getMonth()]+' '+now.getFullYear();
 
-  document.getElementById('dSiparis').textContent = STATE.standProjeler.filter(p=>p.onaylandi).length;
+  const aktifFuarIdsSet = new Set([...FUARLAR, ...(STATE.manuelFuarlar||[])]
+    .filter(f => fuarStatus(f) !== 'past').map(f => f.id));
+  document.getElementById('dSiparis').textContent = STATE.standProjeler
+    .filter(p => p.onaylandi && aktifFuarIdsSet.has(p.fuarId)).length;
   const ciro = STATE.siparisler.reduce((s,x)=>s+(parseFloat(x.tutar)||0),0);
   // Kurulum günü hesabı (fuar başlangıcından 3 gün önce)
   const KURULUM_ONCESI = 3;
