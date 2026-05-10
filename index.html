@@ -12,19 +12,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0a12;
-  --surface: #111120;
-  --surface2: #181828;
-  --border: rgba(255,255,255,0.08);
-  --text: #f0f0ff;
-  --muted: #7a7a9a;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #e8edf2;
+  --border: rgba(0,0,0,0.08);
+  --text: #1a1a2e;
+  --muted: #6b7280;
   --accent: #6c63ff;
   --accent2: #ff6b6b;
-  --green: #26de81;
-  --yellow: #f7b731;
-  --orange: #fd9644;
-  --red: #fc5c65;
-  --blue: #45aaf2;
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --orange: #f97316;
+  --red: #ef4444;
+  --blue: #3b82f6;
 
   --tab-h: 64px;
   --header-h: 60px;
@@ -50,7 +50,7 @@ body {
   top: 0;
   z-index: 50;
   height: var(--header-h);
-  background: rgba(10,10,18,0.95);
+  background: rgba(240,244,248,0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -95,7 +95,7 @@ body {
   transform: translateX(-50%);
   width: 100%; max-width: 480px;
   height: var(--tab-h);
-  background: rgba(10,10,18,0.97);
+  background: rgba(240,244,248,0.97);
   backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
   display: flex;
@@ -264,7 +264,7 @@ body {
 .modal-overlay.open { display: flex; }
 
 .modal-sheet {
-  background: #13131f;
+  background: #ffffff;
   border: 1px solid var(--border);
   border-radius: 20px 20px 0 0;
   padding: 20px;
@@ -651,7 +651,7 @@ body {
 /* Şifre Ekranı */
 #loginScreen {
   position: fixed; inset: 0;
-  background: var(--bg);
+  background: linear-gradient(135deg, #6c63ff, #3b82f6);
   z-index: 999;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -728,7 +728,7 @@ body {
 <div class="page" id="page-fuarlar">
   <div class="section-title">Fuar Takvimi</div>
   <div class="section-sub">2026 · İstanbul</div>
-
+  <button class="btn btn-primary btn-full" style="margin-bottom:14px" onclick="openManuelFuarModal()">+ Manuel Fuar Ekle</button>
   <div class="month-chips" id="monthChips"></div>
   <div id="fuarList"></div>
 </div>
@@ -800,6 +800,45 @@ body {
 
 <!-- FAB -->
 <button class="fab" id="fabBtn" onclick="openAddModal()">＋</button>
+
+<!-- MANUEL FUAR MODAL -->
+<div class="modal-overlay" id="manuelFuarModal" onclick="closeModal('manuelFuarModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="manuelFuarTitle">Manuel Fuar Ekle</div>
+    <input type="hidden" id="manuelFuarEditId">
+    <div class="form-group">
+      <label class="form-label">Fuar Adı *</label>
+      <input type="text" class="form-input" id="mfAd" placeholder="örn: Ankara Yapı Fuarı">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sektör</label>
+      <input type="text" class="form-input" id="mfSektor" placeholder="örn: İnşaat, Teknoloji">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Şehir</label>
+      <input type="text" class="form-input" id="mfSehir" placeholder="örn: Ankara">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mekan</label>
+      <input type="text" class="form-input" id="mfMekan" placeholder="örn: ATO Congresium">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group">
+        <label class="form-label">Başlangıç *</label>
+        <input type="date" class="form-input" id="mfBaslangic">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bitiş *</label>
+        <input type="date" class="form-input" id="mfBitis">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeModal('manuelFuarModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveManuelFuar()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1032,12 +1071,13 @@ window.STATE = {
   musteriler: [],
   notlar: [],
   standProjeler: [],
+  manuelFuarlar: [],
   activePage: 'dashboard',
   sipFilter: 'hepsi',
   projeFuarFilter: 'hepsi',
   fuarMonthFilter: 'Tümü',
-  fuarDetailTab: 'ozet', // ozet | siparisler | stand | notlar
-  standWizard: null, // aktif wizard state
+  fuarDetailTab: 'ozet',
+  standWizard: null,
 };
 
 // ── FUAR VERİSİ ──
@@ -1162,6 +1202,18 @@ onSnapshot(collection(db,'standProjeler'), snap => {
   if (STATE.activeFuarId && document.getElementById('fuarDetailModal')?.classList.contains('open')) {
     renderFuarDetailModal(STATE.activeFuarId);
   }
+});
+
+onSnapshot(collection(db,'manuelFuarlar'), snap => {
+  STATE.manuelFuarlar = snap.docs.map(d => {
+    const f = {id:d.id,...d.data()};
+    f.startDate = new Date(f.startDateStr);
+    f.endDate = new Date(f.endDateStr);
+    f.monthName = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][f.startDate.getMonth()];
+    return f;
+  });
+  renderFuarlar();
+  updateDashboard();
 });
 
 // ── PAGE NAVIGATION ──
@@ -1401,12 +1453,13 @@ function updateDashboard() {
 // ── FUARLAR ──
 window.renderFuarlar = function() {
   const chips = document.getElementById('monthChips');
-  const months = ['Tümü','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  const months = ['Tümü','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
   chips.innerHTML = months.map(m =>
     `<div class="chip ${STATE.fuarMonthFilter===m?'active':''}" onclick="setFuarMonth('${m}',this)">${m}</div>`
   ).join('');
 
-  let list = FUARLAR;
+  // Sabit fuarlar + manuel fuarlar birleştir
+  let list = [...FUARLAR, ...(STATE.manuelFuarlar||[])].sort((a,b)=>a.startDate-b.startDate);
   if (STATE.fuarMonthFilter !== 'Tümü') list = list.filter(f => f.monthName === STATE.fuarMonthFilter);
 
   document.getElementById('fuarList').innerHTML = list.map(f => {
@@ -1415,12 +1468,22 @@ window.renderFuarlar = function() {
     const onayliProjeler = tumProjeler.filter(p => p.onaylandi);
     const sokumGun = st==='active' ? Math.ceil((f.endDate - TODAY) / 86400000) : 0;
     const bg = st==='past'
-      ? 'background:rgba(30,30,50,0.8);border-color:rgba(255,255,255,0.06)'
-      : `background:linear-gradient(135deg, ${f.vColor}55 0%, ${f.vColor}22 100%);border-color:${f.vColor}66`;
+      ? 'background:rgba(200,210,220,0.5);border-color:rgba(0,0,0,0.1)'
+      : `background:linear-gradient(135deg, ${f.vColor}33 0%, ${f.vColor}11 100%);border-color:${f.vColor}66`;
+    const manuelBadge = f.manuel ? `<span class="badge" style="background:rgba(0,0,0,0.1);color:#666;font-size:9px">Manuel</span>` : '';
+    const duzenleBtn = f.manuel ? `<button onclick="event.stopPropagation();openManuelFuarModal('${f.id}')" style="background:rgba(0,0,0,0.08);border:none;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✏️</button>
+    <button onclick="event.stopPropagation();deleteManuelFuar('${f.id}')" style="background:rgba(252,92,101,0.1);border:none;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:#ef4444">🗑️</button>` : '';
     return `<div class="fuar-card ${st}-fuar" style="${bg}" onclick="openFuarDetail('${f.id}')">
       <div class="fuar-card-header">
-        <div class="fuar-card-name">${f.name}</div>
-        ${st==='active' ? '<span class="badge badge-green">🟢 FUAR AÇIK</span>' : st==='upcoming' ? '<span class="badge" style="background:rgba(0,0,0,0.3);color:#fff">'+Math.ceil((f.startDate-TODAY)/86400000)+' gün sonra</span>' : '<span class="badge" style="background:rgba(0,0,0,0.2);color:rgba(255,255,255,0.4)">Geçti</span>'}
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <div class="fuar-card-name">${f.name}</div>
+          ${manuelBadge}
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          ${duzenleBtn}
+          ${st==='active' ? '<span class="badge badge-green">🟢 FUAR AÇIK</span>' : st==='upcoming' ? `<span class="badge" style="background:rgba(0,0,0,0.15);color:#333">${Math.ceil((f.startDate-TODAY)/86400000)} gün sonra</span>` : '<span class="badge" style="background:rgba(0,0,0,0.08);color:#999">Geçti</span>'}
+        </div>
+      </div>
       </div>
       <div class="fuar-card-date">
         <span>${fmtD(f.startDate)} → ${fmtD(f.endDate)}</span>
@@ -2505,6 +2568,65 @@ function checkUpcomingFuarAlarms() {
 }
 
 // ── SYNC STATUS ──
+// ── MANUEL FUAR ──
+window.openManuelFuarModal = function(fid=null) {
+  document.getElementById('manuelFuarEditId').value = '';
+  document.getElementById('manuelFuarTitle').textContent = 'Manuel Fuar Ekle';
+  ['mfAd','mfSektor','mfSehir','mfMekan','mfBaslangic','mfBitis'].forEach(id=>{
+    document.getElementById(id).value = '';
+  });
+  if (fid) {
+    const f = STATE.manuelFuarlar?.find(x=>x.id===fid);
+    if (f) {
+      document.getElementById('manuelFuarEditId').value = fid;
+      document.getElementById('manuelFuarTitle').textContent = 'Fuar Düzenle';
+      document.getElementById('mfAd').value = f.name||'';
+      document.getElementById('mfSektor').value = f.sektor||'';
+      document.getElementById('mfSehir').value = f.sehir||'';
+      document.getElementById('mfMekan').value = f.venue||'';
+      document.getElementById('mfBaslangic').value = f.startDateStr||'';
+      document.getElementById('mfBitis').value = f.endDateStr||'';
+    }
+  }
+  openM('manuelFuarModal');
+};
+
+window.saveManuelFuar = async function() {
+  const ad = document.getElementById('mfAd').value.trim();
+  const baslangic = document.getElementById('mfBaslangic').value;
+  const bitis = document.getElementById('mfBitis').value;
+  if (!ad) { showToast('⚠️ Fuar adı girin'); return; }
+  if (!baslangic || !bitis) { showToast('⚠️ Tarih girin'); return; }
+  const data = {
+    name: ad,
+    sektor: document.getElementById('mfSektor').value,
+    sehir: document.getElementById('mfSehir').value,
+    venue: document.getElementById('mfMekan').value || document.getElementById('mfSehir').value,
+    startDateStr: baslangic,
+    endDateStr: bitis,
+    vColor: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),
+    manuel: true,
+  };
+  const editId = document.getElementById('manuelFuarEditId').value;
+  try {
+    if (editId) {
+      await updateDoc(doc(db,'manuelFuarlar',editId), data);
+      showToast('✅ Fuar güncellendi');
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db,'manuelFuarlar'), data);
+      showToast('✅ Fuar eklendi');
+    }
+    closeModal('manuelFuarModal');
+  } catch(err) { showToast('❌ ' + err.message); }
+};
+
+window.deleteManuelFuar = async function(fid) {
+  if (!confirm('Bu fuar silinsin mi?')) return;
+  await deleteDoc(doc(db,'manuelFuarlar',fid));
+  showToast('🗑️ Silindi');
+};
+
 window.syncStatus = function() {
   showToast('☁️ Firebase bağlı · Veriler senkronize');
 };
