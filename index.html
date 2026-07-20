@@ -777,6 +777,32 @@ body {
 
 <!-- 7. ONAYLI PROJELER - siparisler sekmesinde gösteriliyor -->
 
+<!-- 8. DEPO (çıkış/giriş herkese açık; kayıtlar sadece yönetici + depocu) -->
+<div class="page" id="page-depo">
+  <div class="section-title">🏭 Depo</div>
+  <div class="section-sub" id="depoSub">Depodan aldığını ve bıraktığını buradan kaydet</div>
+  <div id="depoBtnGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+    <button class="btn btn-primary" style="padding:16px;font-size:15px" onclick="openDepoModal()">📤 Depodan<br>Çıkış Yap</button>
+    <button class="btn btn-primary" id="depoBtnGiris" style="padding:16px;font-size:15px;background:#26de81" onclick="openDepoGirisModal()">📥 Depoya<br>Bırak</button>
+  </div>
+  <div id="depoAdminAlan" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="depoFilters">
+      <div class="chip active" onclick="setDepoFilter('acik',this)">🚚 Dışarıda</div>
+      <div class="chip" onclick="setDepoFilter('giris',this)">📥 Girişler</div>
+      <div class="chip" onclick="setDepoFilter('tamam',this)">✅ Biten</div>
+      <div class="chip" onclick="setDepoFilter('hepsi',this)">Tüm Çıkışlar</div>
+    </div>
+    <div id="depoList"></div>
+  </div>
+  <div id="depoUserAlan" style="display:none">
+    <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📦 Üstümdeki Malzemeler</div>
+    <div id="depoOwnList"></div>
+    <div style="text-align:center;color:var(--muted);font-size:12px;padding:14px 16px">
+      Kayıt geçmişini yönetici ve depocu görür.<br>Başkasının aldığı malzemeyi getirdiysen depocuya teslim et.
+    </div>
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <button class="tab-btn active" onclick="showPage('dashboard',this)">
@@ -798,6 +824,10 @@ body {
   <button class="tab-btn" onclick="showPage('musteriler',this)">
     <span class="tab-icon">📇</span>
     <span class="tab-label">Müşteri</span>
+  </button>
+  <button class="tab-btn" id="navDepo" style="display:none" onclick="showPage('depo',this)">
+    <span class="tab-icon">🏭</span>
+    <span class="tab-label">Depo</span>
   </button>
 </nav>
 
@@ -903,6 +933,86 @@ body {
 </div>
 
 <!-- Stok Ekle/Düzenle -->
+<!-- DEPO ÇIKIŞ MODAL -->
+<div class="modal-overlay" id="depoModal" onclick="closeModal('depoModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📤 Depodan Çıkış</div>
+    <div class="form-group">
+      <label class="form-label">1️⃣ Ne için çıkıyor? *</label>
+      <input type="text" class="form-input" id="depoNeden" placeholder="örn. CNR fuarı / şantiye / tamir">
+    </div>
+    <div class="form-group">
+      <label class="form-label">2️⃣ Geri gelecek mi?</label>
+      <select class="form-input" id="depoGeri" onchange="depoGeriDegisti()">
+        <option value="evet">✔️ Evet, geri gelecek</option>
+        <option value="hayir">➡️ Hayır, geri gelmeyecek (satış/sarf)</option>
+      </select>
+    </div>
+    <div class="form-group" id="depoTarihGrup">
+      <label class="form-label">3️⃣ Dönüş tarihi belli mi? (belliyse seç)</label>
+      <input type="date" class="form-input" id="depoTarihBekle">
+    </div>
+    <div class="form-group">
+      <label class="form-label">4️⃣ Kim aldı / kime teslim edildi? *</label>
+      <input type="text" class="form-input" id="depoAlan" placeholder="örn. Ahmet (teknisyen)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">5️⃣ Çıkan malzemeler *</label>
+      <div id="depoSatirlar"></div>
+      <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px;margin-top:6px">
+        <input type="text" class="form-input" id="depoUrunAd" placeholder="Malzeme adı">
+        <input type="number" class="form-input" id="depoUrunAdet" placeholder="Adet" min="1">
+        <button class="btn btn-primary" onclick="depoSatirEkle()" style="padding:0 16px">＋</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Not (isteğe bağlı)</label>
+      <input type="text" class="form-input" id="depoNot" placeholder="Ek açıklama">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="kaydetDepoCikis()">Çıkışı Kaydet</button>
+  </div>
+</div>
+
+<!-- DEPO GİRİŞ MODAL -->
+<div class="modal-overlay" id="depoGirisModal" onclick="closeModal('depoGirisModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📥 Depoya Bırak</div>
+    <div class="form-group">
+      <label class="form-label">Kim getirdi? *</label>
+      <input type="text" class="form-input" id="girisGetiren" placeholder="örn. Ahmet (teknisyen)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nereden geliyor?</label>
+      <input type="text" class="form-input" id="girisNereden" placeholder="örn. CNR fuarı dönüşü / tamirden geldi">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Bırakılan malzemeler *</label>
+      <div id="girisSatirlar"></div>
+      <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px;margin-top:6px">
+        <input type="text" class="form-input" id="girisUrunAd" placeholder="Malzeme adı">
+        <input type="number" class="form-input" id="girisUrunAdet" placeholder="Adet" min="1">
+        <button class="btn btn-primary" onclick="girisSatirEkle()" style="padding:0 16px">＋</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Not (isteğe bağlı)</label>
+      <input type="text" class="form-input" id="girisNot" placeholder="örn. 1 kablo hasarlı geldi">
+    </div>
+    <button class="btn btn-primary btn-full" style="background:#26de81" onclick="kaydetDepoGiris()">Girişi Kaydet</button>
+  </div>
+</div>
+
+<!-- DEPO DÖNÜŞ MODAL -->
+<div class="modal-overlay" id="depoDetayModal" onclick="closeModal('depoDetayModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="depoDetayTitle">Dönüş Kontrolü</div>
+    <div id="depoDetayIcerik"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="stokModal" onclick="closeModal('stokModal',event)">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -1049,7 +1159,7 @@ body {
 <!-- ═══════════════ FIREBASE + APP LOGIC ═══════════════ -->
 <script type="module">
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp }
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -1076,6 +1186,13 @@ window.STATE = {
   stoklar: [],
   musteriler: [],
   notlar: [],
+  depoCikis: [],
+  depoGiris: [],
+  depoOwn: [],
+  depoGeriBildirilen: {},
+  depoFilter: 'acik',
+  depoYeniSatirlar: [],
+  depoGirisSatirlar: [],
   standProjeler: [],
   manuelFuarlar: [],
   activePage: 'dashboard',
@@ -1212,6 +1329,25 @@ onSnapshot(collection(db,'manuelFuarlar'), snap => {
   renderFuarlar();
   updateDashboard();
 });
+
+// Depo kayıtları — tüm listeyi sadece yönetici ve depocu okuyabilir (kurallar da böyle);
+// normal kullanıcı ise SADECE kendi açtığı çıkışları görür ("üstümdeki malzemeler").
+if (window.CURRENT_USER && ['admin','depocu'].includes(window.CURRENT_USER.rol)) {
+  onSnapshot(query(collection(db,'depoCikis'), orderBy('tarih','desc')), snap => {
+    STATE.depoCikis = snap.docs.map(d => ({id:d.id,...d.data()}));
+    if (STATE.activePage === 'depo') renderDepo();
+  });
+  onSnapshot(query(collection(db,'depoGiris'), orderBy('tarih','desc')), snap => {
+    STATE.depoGiris = snap.docs.map(d => ({id:d.id,...d.data()}));
+    if (STATE.activePage === 'depo') renderDepo();
+  });
+} else if (window.CURRENT_USER) {
+  onSnapshot(query(collection(db,'depoCikis'), where('olusturanEmail','==',window.CURRENT_USER.email)), snap => {
+    STATE.depoOwn = snap.docs.map(d => ({id:d.id,...d.data()}))
+      .sort((a,b) => (b.tarih?.seconds||0) - (a.tarih?.seconds||0));
+    if (STATE.activePage === 'depo') renderDepo();
+  });
+}
 } // connectFirebase sonu
 
 // ── PAGE NAVIGATION ──
@@ -1224,12 +1360,13 @@ window.showPage = function(page, btn) {
   updateFab();
   if (page === 'notlar') renderNotlar();
   if (page === 'siparisler') renderOnayliProjeler();
+  if (page === 'depo') renderDepo();
 };
 
 function updateFab() {
   const fab = document.getElementById('fabBtn');
   const p = STATE.activePage;
-  if (['dashboard','fuarlar'].includes(p)) { fab.style.display='none'; return; }
+  if (['dashboard','fuarlar','depo'].includes(p)) { fab.style.display='none'; return; }
   fab.style.display='flex';
   fab.onclick = () => {
     if (p==='siparisler') openSipModal();
@@ -2648,6 +2785,362 @@ window.syncStatus = function() {
   showToast('☁️ Firebase bağlı · Veriler senkronize');
 };
 
+// ── DEPO TAKİP ──
+function depoTarih(t) {
+  if (!t || !t.seconds) return '';
+  const d = new Date(t.seconds * 1000);
+  return d.getDate().toString().padStart(2,'0') + '.' + (d.getMonth()+1).toString().padStart(2,'0') + '.' + d.getFullYear();
+}
+function depoFuarAdi(fid) {
+  if (!fid) return '';
+  const f = [...FUARLAR, ...(STATE.manuelFuarlar||[])].find(x => x.id === fid);
+  return f ? f.name.split('–')[0].trim() : '';
+}
+function depoItemDurum(u) {
+  const islenen = (u.saglam||0) + (u.hasarli||0) + (u.kayip||0);
+  return { islenen, bitti: islenen >= u.adet };
+}
+
+function depoYetkiliMi() {
+  return window.CURRENT_USER && ['admin','depocu'].includes(window.CURRENT_USER.rol);
+}
+function depoBeklenenStr(s) {
+  if (!s) return '';
+  const [y,m,g] = s.split('-');
+  return g + '.' + m + '.' + y;
+}
+function depoGecikti(c) {
+  if (c.durum !== 'disarida' || !c.beklenenTarih) return false;
+  const bugun = new Date(); bugun.setHours(0,0,0,0);
+  return new Date(c.beklenenTarih + 'T00:00:00') < bugun;
+}
+
+window.setDepoFilter = function(v, el) {
+  STATE.depoFilter = v;
+  document.querySelectorAll('#depoFilters .chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderDepo();
+};
+
+window.renderDepo = function() {
+  const yetkili = depoYetkiliMi();
+  const adminAlan = document.getElementById('depoAdminAlan');
+  const userAlan = document.getElementById('depoUserAlan');
+  if (adminAlan) adminAlan.style.display = yetkili ? '' : 'none';
+  if (userAlan) userAlan.style.display = yetkili ? 'none' : '';
+  // "Depoya Bırak" (serbest giriş) sadece yönetici + depocu
+  const btnGiris = document.getElementById('depoBtnGiris');
+  const btnGrid = document.getElementById('depoBtnGrid');
+  if (btnGiris) btnGiris.style.display = yetkili ? '' : 'none';
+  if (btnGrid) btnGrid.style.gridTemplateColumns = yetkili ? '1fr 1fr' : '1fr';
+  const subEl = document.getElementById('depoSub');
+  if (!yetkili) {
+    if (subEl) subEl.textContent = 'Aldığını kaydet, geri getirince bildir';
+    renderDepoOwn();
+    return;
+  }
+  const acikSay = STATE.depoCikis.filter(c => c.durum === 'disarida').length;
+  const gecikenSay = STATE.depoCikis.filter(c => depoGecikti(c)).length;
+  if (subEl) subEl.textContent = acikSay
+    ? (acikSay + ' çıkış dışarıda' + (gecikenSay ? ' · ⏰ ' + gecikenSay + ' gecikmiş!' : ''))
+    : 'Dışarıda malzeme yok 👍';
+  const listEl = document.getElementById('depoList'); if (!listEl) return;
+
+  // GİRİŞLER görünümü
+  if (STATE.depoFilter === 'giris') {
+    if (!STATE.depoGiris.length) { listEl.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted)">Henüz giriş kaydı yok.</div>'; return; }
+    listEl.innerHTML = STATE.depoGiris.map(g => {
+      const bagli = g.cikisId ? STATE.depoCikis.find(x => x.id === g.cikisId) : null;
+      return `<div class="card" style="margin-bottom:10px;border-left:4px solid #26de81${bagli && bagli.durum === 'disarida' ? ';box-shadow:0 0 0 1px rgba(247,183,49,0.4)' : ''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div>
+            <div style="font-weight:700">📥 ${g.getiren || '(kim getirdiği yazılmamış)'}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">${depoTarih(g.tarih)}${g.nereden ? ' · ' + g.nereden : ''}${g.olusturan && g.olusturan !== g.getiren ? ' · kaydı yazan: ' + g.olusturan : ''}</div>
+          </div>
+          ${window.CURRENT_USER && window.CURRENT_USER.rol === 'admin' ? `<span style="cursor:pointer;color:var(--red,#fc5c65);font-size:12px" onclick="silDepoGiris('${g.id}')">Sil</span>` : ''}
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">${(g.urunler||[]).map(u => u.ad + ' ×' + u.adet).join(' · ')}</div>
+        ${g.not ? `<div style="font-size:12px;margin-top:6px">📝 ${g.not}</div>` : ''}
+        ${bagli ? `<button class="btn btn-full" style="margin-top:8px;padding:9px;font-size:13px${bagli.durum === 'disarida' ? '' : ';background:none;border:1px solid rgba(255,255,255,0.2)'}" onclick="openDepoDetay('${bagli.id}')">${bagli.durum === 'disarida' ? '🔍 Kontrol Et ve Onayla → ' + (bagli.neden || '') : '✅ Onaylandı → kaydı aç'}</button>` : ''}
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // ÇIKIŞLAR görünümleri
+  let list = STATE.depoCikis;
+  if (STATE.depoFilter === 'acik') list = list.filter(c => c.durum === 'disarida');
+  if (STATE.depoFilter === 'tamam') list = list.filter(c => c.durum === 'tamamlandi' || c.durum === 'kalici');
+  if (!list.length) {
+    listEl.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted)">Bu filtrede kayıt yok.</div>';
+    return;
+  }
+  listEl.innerHTML = list.map(c => {
+    const toplam = (c.urunler||[]).reduce((s,u) => s + (u.adet||0), 0);
+    const donen  = (c.urunler||[]).reduce((s,u) => s + (u.saglam||0) + (u.hasarli||0) + (u.kayip||0), 0);
+    const hasar  = (c.urunler||[]).reduce((s,u) => s + (u.hasarli||0), 0);
+    const kayip  = (c.urunler||[]).reduce((s,u) => s + (u.kayip||0), 0);
+    const gecikti = depoGecikti(c);
+    let renk = '#f7b731', durumYazi = '📤 ' + donen + '/' + toplam + ' döndü';
+    if (c.durum === 'tamamlandi') { renk = '#26de81'; durumYazi = '✅ Tamamlandı'; }
+    else if (c.durum === 'kalici') { renk = '#a5b1c2'; durumYazi = '➡️ Geri gelmeyecek'; }
+    else if (gecikti) { renk = '#fc5c65'; durumYazi = '⏰ GECİKTİ · ' + donen + '/' + toplam; }
+    return `<div class="card" style="cursor:pointer;margin-bottom:10px;border-left:4px solid ${renk}" onclick="openDepoDetay('${c.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div style="font-weight:700">${c.neden || c.nereye || '(belirtilmemiş)'}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">
+            ${depoTarih(c.tarih)}${c.alan ? ' · 👤 ' + c.alan : ''}${c.beklenenTarih ? ' · 📆 dönüş: ' + depoBeklenenStr(c.beklenenTarih) : ''}
+          </div>
+        </div>
+        <div style="font-size:12px;white-space:nowrap;font-weight:700;color:${renk}">${durumYazi}</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">
+        ${(c.urunler||[]).map(u => u.ad + ' ×' + u.adet).join(' · ')}
+      </div>
+      ${(hasar || kayip) ? `<div style="font-size:12px;margin-top:6px">${hasar ? '🔧 ' + hasar + ' hasarlı ' : ''}${kayip ? '❌ ' + kayip + ' kayıp' : ''}</div>` : ''}
+    </div>`;
+  }).join('');
+};
+
+// Normal kullanıcının "üstümdeki malzemeler" listesi
+function renderDepoOwn() {
+  const el = document.getElementById('depoOwnList'); if (!el) return;
+  const acik = STATE.depoOwn.filter(c => c.durum === 'disarida');
+  if (!acik.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">Üstünde görünen malzeme yok 👍</div>';
+    return;
+  }
+  el.innerHTML = acik.map(c => {
+    const bildirildi = STATE.depoGeriBildirilen[c.id];
+    return `<div class="card" style="margin-bottom:10px;border-left:4px solid #f7b731">
+      <div style="font-weight:700">${c.neden || '(belirtilmemiş)'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">${depoTarih(c.tarih)}${c.beklenenTarih ? ' · 📆 dönüş: ' + depoBeklenenStr(c.beklenenTarih) : ''}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">${(c.urunler||[]).map(u => u.ad + ' ×' + u.adet).join(' · ')}</div>
+      ${bildirildi
+        ? '<div style="font-size:12px;color:#26de81;margin-top:8px;font-weight:700">✔️ Bildirildi — depocu kontrol edip onaylayacak</div>'
+        : `<button class="btn btn-full" style="margin-top:10px;background:#26de81;padding:10px" onclick="geriGetirdim('${c.id}')">📥 Geri Getirdim</button>`}
+    </div>`;
+  }).join('');
+}
+
+window.geriGetirdim = async function(cikisId) {
+  const c = STATE.depoOwn.find(x => x.id === cikisId); if (!c) return;
+  if (!confirm('Malzemeleri depoya geri getirdin mi? Kayıt depocuya bildirilecek.')) return;
+  try {
+    await addDoc(collection(db,'depoGiris'), {
+      cikisId,
+      getiren: window.CURRENT_USER ? (window.CURRENT_USER.ad || window.CURRENT_USER.email) : '',
+      nereden: (c.neden || '') + ' dönüşü',
+      not: 'Kullanıcı geri getirdiğini bildirdi — depocu kontrolü bekliyor',
+      urunler: (c.urunler||[]).map(u => ({ ad: u.ad, adet: Math.max(0, (u.adet||0) - ((u.saglam||0)+(u.hasarli||0)+(u.kayip||0))) })).filter(u => u.adet > 0),
+      olusturan: window.CURRENT_USER ? (window.CURRENT_USER.ad || window.CURRENT_USER.email) : '',
+      tarih: serverTimestamp()
+    });
+    STATE.depoGeriBildirilen[cikisId] = true;
+    renderDepoOwn();
+    showToast('📥 Bildirildi! Malzemeyi depocuya teslim et.');
+  } catch (e) { showToast('❌ Bildirilemedi: ' + e.message); }
+};
+
+window.depoGeriDegisti = function() {
+  const geri = document.getElementById('depoGeri').value;
+  document.getElementById('depoTarihGrup').style.display = geri === 'hayir' ? 'none' : '';
+};
+
+window.openDepoModal = function() {
+  STATE.depoYeniSatirlar = [];
+  renderDepoSatirlar();
+  document.getElementById('depoNeden').value = '';
+  document.getElementById('depoGeri').value = 'evet';
+  document.getElementById('depoTarihBekle').value = '';
+  document.getElementById('depoTarihGrup').style.display = '';
+  document.getElementById('depoAlan').value = window.CURRENT_USER ? (window.CURRENT_USER.ad || '') : '';
+  document.getElementById('depoNot').value = '';
+  document.getElementById('depoUrunAd').value = '';
+  document.getElementById('depoUrunAdet').value = '';
+  document.getElementById('depoModal').classList.add('open');
+};
+
+window.openDepoGirisModal = function() {
+  STATE.depoGirisSatirlar = [];
+  renderGirisSatirlar();
+  document.getElementById('girisGetiren').value = window.CURRENT_USER ? (window.CURRENT_USER.ad || '') : '';
+  document.getElementById('girisNereden').value = '';
+  document.getElementById('girisNot').value = '';
+  document.getElementById('girisUrunAd').value = '';
+  document.getElementById('girisUrunAdet').value = '';
+  document.getElementById('depoGirisModal').classList.add('open');
+};
+
+function renderDepoSatirlar() {
+  const el = document.getElementById('depoSatirlar'); if (!el) return;
+  el.innerHTML = STATE.depoYeniSatirlar.map((u,i) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:6px">
+      <span style="font-size:14px">${u.ad} <b>×${u.adet}</b></span>
+      <span style="cursor:pointer;color:var(--red,#fc5c65);font-weight:700" onclick="depoSatirSil(${i})">×</span>
+    </div>`).join('');
+}
+
+window.depoSatirEkle = function() {
+  const ad = document.getElementById('depoUrunAd').value.trim();
+  const adet = parseInt(document.getElementById('depoUrunAdet').value) || 0;
+  if (!ad || adet < 1) { showToast('⚠️ Malzeme adı ve adet girin'); return; }
+  STATE.depoYeniSatirlar.push({ ad, adet, saglam: 0, hasarli: 0, kayip: 0 });
+  document.getElementById('depoUrunAd').value = '';
+  document.getElementById('depoUrunAdet').value = '';
+  document.getElementById('depoUrunAd').focus();
+  renderDepoSatirlar();
+};
+
+window.depoSatirSil = function(i) {
+  STATE.depoYeniSatirlar.splice(i, 1);
+  renderDepoSatirlar();
+};
+
+window.kaydetDepoCikis = async function() {
+  const neden = document.getElementById('depoNeden').value.trim();
+  const alan = document.getElementById('depoAlan').value.trim();
+  if (!neden) { showToast('⚠️ Ne için çıktığını yazın (fuar, şantiye...)'); return; }
+  if (!alan) { showToast('⚠️ Kimin aldığını yazın'); return; }
+  if (!STATE.depoYeniSatirlar.length) { showToast('⚠️ En az 1 malzeme ekleyin'); return; }
+  const geri = document.getElementById('depoGeri').value;
+  try {
+    await addDoc(collection(db,'depoCikis'), {
+      neden,
+      alan,
+      geriGelecek: geri,
+      beklenenTarih: geri === 'evet' ? (document.getElementById('depoTarihBekle').value || null) : null,
+      not: document.getElementById('depoNot').value.trim(),
+      urunler: STATE.depoYeniSatirlar,
+      durum: geri === 'hayir' ? 'kalici' : 'disarida',
+      olusturan: window.CURRENT_USER ? (window.CURRENT_USER.ad || window.CURRENT_USER.email) : '',
+      olusturanEmail: window.CURRENT_USER ? window.CURRENT_USER.email : '',
+      tarih: serverTimestamp()
+    });
+    document.getElementById('depoModal').classList.remove('open');
+    showToast('📤 Çıkış kaydedildi, teşekkürler!');
+  } catch (e) { showToast('❌ Kaydedilemedi: ' + e.message); }
+};
+
+function renderGirisSatirlar() {
+  const el = document.getElementById('girisSatirlar'); if (!el) return;
+  el.innerHTML = STATE.depoGirisSatirlar.map((u,i) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:6px">
+      <span style="font-size:14px">${u.ad} <b>×${u.adet}</b></span>
+      <span style="cursor:pointer;color:var(--red,#fc5c65);font-weight:700" onclick="girisSatirSil(${i})">×</span>
+    </div>`).join('');
+}
+
+window.girisSatirEkle = function() {
+  const ad = document.getElementById('girisUrunAd').value.trim();
+  const adet = parseInt(document.getElementById('girisUrunAdet').value) || 0;
+  if (!ad || adet < 1) { showToast('⚠️ Malzeme adı ve adet girin'); return; }
+  STATE.depoGirisSatirlar.push({ ad, adet });
+  document.getElementById('girisUrunAd').value = '';
+  document.getElementById('girisUrunAdet').value = '';
+  document.getElementById('girisUrunAd').focus();
+  renderGirisSatirlar();
+};
+
+window.girisSatirSil = function(i) {
+  STATE.depoGirisSatirlar.splice(i, 1);
+  renderGirisSatirlar();
+};
+
+window.kaydetDepoGiris = async function() {
+  const getiren = document.getElementById('girisGetiren').value.trim();
+  if (!getiren) { showToast('⚠️ Kimin getirdiğini yazın'); return; }
+  if (!STATE.depoGirisSatirlar.length) { showToast('⚠️ En az 1 malzeme ekleyin'); return; }
+  try {
+    await addDoc(collection(db,'depoGiris'), {
+      getiren,
+      nereden: document.getElementById('girisNereden').value.trim(),
+      not: document.getElementById('girisNot').value.trim(),
+      urunler: STATE.depoGirisSatirlar,
+      olusturan: window.CURRENT_USER ? (window.CURRENT_USER.ad || window.CURRENT_USER.email) : '',
+      tarih: serverTimestamp()
+    });
+    document.getElementById('depoGirisModal').classList.remove('open');
+    showToast('📥 Giriş kaydedildi, teşekkürler!');
+  } catch (e) { showToast('❌ Kaydedilemedi: ' + e.message); }
+};
+
+window.silDepoGiris = async function(id) {
+  if (!confirm('Bu giriş kaydı silinsin mi?')) return;
+  try { await deleteDoc(doc(db,'depoGiris',id)); showToast('🗑️ Silindi'); }
+  catch (e) { showToast('❌ Silinemedi: ' + e.message); }
+};
+
+window.openDepoDetay = function(id) {
+  const c = STATE.depoCikis.find(x => x.id === id); if (!c) return;
+  document.getElementById('depoDetayTitle').textContent = '📦 ' + (c.neden || c.nereye || 'Dönüş Kontrolü');
+  const icerik = document.getElementById('depoDetayIcerik');
+  const kalici = c.durum === 'kalici';
+  const gecikti = depoGecikti(c);
+  icerik.innerHTML =
+    `<div style="font-size:13px;color:var(--muted);margin-bottom:14px">
+      ${depoTarih(c.tarih)}${c.alan ? ' · Teslim alan: ' + c.alan : ''}${c.olusturan ? ' · Kaydı yazan: ' + c.olusturan : ''}
+      ${kalici ? '<br>➡️ Geri gelmeyecek (satış/sarf)' : (c.beklenenTarih ? '<br>📆 Beklenen dönüş: ' + depoBeklenenStr(c.beklenenTarih) + (gecikti ? ' <b style="color:var(--red,#fc5c65)">⏰ GECİKTİ</b>' : '') : '')}
+      ${c.not ? '<br>📝 ' + c.not : ''}
+    </div>` +
+    (c.urunler||[]).map((u,i) => {
+      const st = depoItemDurum(u);
+      const kalan = u.adet - st.islenen;
+      return `<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:700">${u.ad} <span style="color:var(--muted);font-weight:400">×${u.adet} çıktı</span></div>
+          <div style="font-size:12px;font-weight:700;color:${kalici ? '#a5b1c2' : (st.bitti ? 'var(--green,#26de81)' : '#f7b731')}">${kalici ? '➡️ Dönüşsüz' : (st.bitti ? '✅ Tamam' : kalan + ' adet dışarıda')}</div>
+        </div>
+        ${!kalici ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">
+          ✔️ Sağlam: ${u.saglam||0} · 🔧 Hasarlı: ${u.hasarli||0} · ❌ Kayıp: ${u.kayip||0}
+        </div>` : ''}
+        ${(!kalici && !st.bitti) ? `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-top:10px">
+          <input type="number" class="form-input" id="dSag${i}" placeholder="Sağlam" min="0" style="padding:8px;font-size:13px">
+          <input type="number" class="form-input" id="dHas${i}" placeholder="Hasarlı" min="0" style="padding:8px;font-size:13px">
+          <input type="number" class="form-input" id="dKay${i}" placeholder="Kayıp" min="0" style="padding:8px;font-size:13px">
+          <button class="btn btn-primary" style="padding:0 14px" onclick="depoIsle('${c.id}',${i})">İşle</button>
+        </div>` : ''}
+      </div>`;
+    }).join('') +
+    (window.CURRENT_USER && window.CURRENT_USER.rol === 'admin'
+      ? `<button class="btn btn-full" style="margin-top:6px;background:none;border:1px solid rgba(252,92,101,0.5);color:var(--red,#fc5c65)" onclick="silDepoCikis('${c.id}')">Kaydı Sil</button>`
+      : '');
+  document.getElementById('depoDetayModal').classList.add('open');
+};
+
+window.depoIsle = async function(id, i) {
+  const c = STATE.depoCikis.find(x => x.id === id); if (!c) return;
+  const u = c.urunler[i]; if (!u) return;
+  const sag = parseInt(document.getElementById('dSag'+i)?.value) || 0;
+  const has = parseInt(document.getElementById('dHas'+i)?.value) || 0;
+  const kay = parseInt(document.getElementById('dKay'+i)?.value) || 0;
+  if (sag + has + kay < 1) { showToast('⚠️ En az bir adet girin'); return; }
+  const st = depoItemDurum(u);
+  if (st.islenen + sag + has + kay > u.adet) { showToast('⚠️ Çıkan adetten fazla girilemez (' + (u.adet - st.islenen) + ' kaldı)'); return; }
+  const yeni = c.urunler.map((x,idx) => idx === i
+    ? { ...x, saglam: (x.saglam||0)+sag, hasarli: (x.hasarli||0)+has, kayip: (x.kayip||0)+kay }
+    : x);
+  const hepsiTamam = yeni.every(x => depoItemDurum(x).bitti);
+  try {
+    await updateDoc(doc(db,'depoCikis',id), { urunler: yeni, durum: hepsiTamam ? 'tamamlandi' : 'disarida' });
+    showToast(hepsiTamam ? '✅ Çıkış tamamlandı — hepsi kontrol edildi' : '✔️ İşlendi');
+    // yerelde de güncelle ki modal anında yenilensin
+    c.urunler = yeni; c.durum = hepsiTamam ? 'tamamlandi' : 'disarida';
+    openDepoDetay(id);
+  } catch (e) { showToast('❌ İşlenemedi: ' + e.message); }
+};
+
+window.silDepoCikis = async function(id) {
+  if (!confirm('Bu depo kaydı silinsin mi?')) return;
+  try {
+    await deleteDoc(doc(db,'depoCikis',id));
+    document.getElementById('depoDetayModal').classList.remove('open');
+    showToast('🗑️ Silindi');
+  } catch (e) { showToast('❌ Silinemedi: ' + e.message); }
+};
+
 // ── GİRİŞ (Firebase Auth) ──
 const KOD_DOMAIN = '@beyoglu.com';   // kullanıcı kodu → e-posta dönüşümü
 
@@ -2738,10 +3231,14 @@ function renderUserChip() {
     document.body.appendChild(chip);
   }
   const admin = u.rol === 'admin';
+  const rolEtiket = admin ? ' <span style="opacity:.55">· yönetici</span>' : (u.rol === 'depocu' ? ' <span style="opacity:.55">· depocu</span>' : '');
   chip.innerHTML =
-    '<span>👤 ' + (u.ad || u.email) + (admin ? ' <span style="opacity:.55">· yönetici</span>' : '') + '</span>' +
+    '<span>👤 ' + (u.ad || u.email) + rolEtiket + '</span>' +
     (admin ? '<button onclick="openKullaniciYonetimi()" title="Kullanıcılar" style="background:none;border:none;color:#fff;cursor:pointer;font-size:15px">⚙️</button>' : '') +
     '<button onclick="logout()" title="Çıkış" style="background:none;border:none;color:#fff;cursor:pointer;font-size:14px">⏻</button>';
+  // Depo sekmesi herkese açık (kayıt listesi ise sadece yönetici + depocu)
+  const navDepo = document.getElementById('navDepo');
+  if (navDepo) navDepo.style.display = '';
 }
 
 // ── KULLANICI YÖNETİMİ (sadece yönetici) ──
@@ -2766,6 +3263,7 @@ window.openKullaniciYonetimi = async function() {
           '<input id="ykSifre" type="text" placeholder="Şifre (en az 6 karakter)" style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#0f131c;color:#fff">' +
           '<select id="ykRol" style="width:100%;box-sizing:border-box;margin-bottom:10px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#0f131c;color:#fff">' +
             '<option value="personel">Personel (kullanır)</option>' +
+            '<option value="depocu">Depocu (depo sekmesini de görür)</option>' +
             '<option value="admin">Yönetici (kullanıcı da ekler)</option>' +
           '</select>' +
           '<button onclick="ekleKullanici()" id="ykEkleBtn" style="width:100%;padding:12px;border:none;border-radius:8px;background:#4f9cf8;color:#fff;font-weight:600;cursor:pointer">Ekle</button>' +
@@ -2785,7 +3283,7 @@ async function refreshKullaniciListe() {
       const k = d.data(); const email = d.id;
       const self = window.CURRENT_USER && window.CURRENT_USER.email === email;
       return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06)">' +
-        '<div><div style="font-weight:600">' + (k.ad || '(isimsiz)') + (k.rol === 'admin' ? ' <span style="opacity:.5;font-weight:400">· yönetici</span>' : '') + '</div>' +
+        '<div><div style="font-weight:600">' + (k.ad || '(isimsiz)') + (k.rol === 'admin' ? ' <span style="opacity:.5;font-weight:400">· yönetici</span>' : (k.rol === 'depocu' ? ' <span style="opacity:.5;font-weight:400">· depocu</span>' : '')) + '</div>' +
         '<div style="font-size:12px;opacity:.5">' + (k.kod || email.split('@')[0]) + '</div></div>' +
         (self ? '<span style="font-size:12px;opacity:.5">siz</span>' :
           '<button onclick="silKullanici(\'' + email + '\')" style="background:none;border:1px solid rgba(252,92,101,0.5);color:#fc5c65;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">Sil</button>') +
@@ -2803,6 +3301,7 @@ window.ekleKullanici = async function() {
   const msg = document.getElementById('ykMsg');
   const btn = document.getElementById('ykEkleBtn');
   if (!ad || !kod || sifre.length < 6) { msg.style.color = '#fc5c65'; msg.textContent = 'Ad, kod ve en az 6 karakterli şifre gerekli'; return; }
+  if (!/^[a-z0-9]+$/.test(kod)) { msg.style.color = '#fc5c65'; msg.textContent = 'Kod: küçük harf + rakam, boşluksuz, Türkçe karaktersiz (örn. ayhan)'; return; }
   btn.disabled = true; btn.textContent = 'Ekleniyor…'; msg.style.color = '#aaa'; msg.textContent = '';
   const email = kod + KOD_DOMAIN;
   let secApp = null;
